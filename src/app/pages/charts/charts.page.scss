@@ -137,6 +137,20 @@ ion-toggle {
     line-height: 1.55;
   }
 
+  .legal {
+    margin-top: 12px;
+
+    a {
+      color: var(--ion-color-primary);
+      text-decoration: none;
+    }
+
+    .sep {
+      margin: 0 8px;
+      color: var(--yb-muted);
+    }
+  }
+
   .keys {
     margin-top: 12px;
   }

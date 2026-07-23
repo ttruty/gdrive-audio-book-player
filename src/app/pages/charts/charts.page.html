@@ -456,6 +456,12 @@
   <div class="yb-panel about">
     <p class="name">{{ t().appMark }} Yarnbeard</p>
     <p class="yb-small yb-muted">{{ t().aboutBlurb }}</p>
+    <p class="yb-small legal">
+      <!-- Relative, so they resolve under whatever base href the build used. -->
+      <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
+      <span class="sep">·</span>
+      <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a>
+    </p>
     <p class="yb-small yb-muted keys">
       At a desk: <kbd>space</kbd> play · <kbd>←</kbd>/<kbd>→</kbd> skip ·
       <kbd>[</kbd>/<kbd>]</kbd> chapter · <kbd>−</kbd>/<kbd>+</kbd> speed

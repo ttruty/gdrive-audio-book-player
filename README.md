@@ -327,6 +327,29 @@ right tab, the manifest's `start_url`, `scope` and shortcuts all resolve inside
 the subpath, and the service worker registers with the subpath scope and
 controls the page.
 
+### Privacy Policy and Terms
+
+[`PRIVACY.md`](PRIVACY.md) and [`TERMS.md`](TERMS.md) at the repo root are the
+source of truth. `tools/build-legal.mjs` renders them into the build as
+`privacy.html` and `terms.html` on every build, and the app links to both from
+**Settings → About**.
+
+They are published on the app's own origin on purpose: **Google's OAuth
+verification requires the privacy policy to be on the same domain as the app**,
+and GitHub renders repo Markdown on `github.com`, which is a different origin
+from `github.io`. So the URLs to give Google are:
+
+```
+Homepage:        https://<user>.github.io/<repo>/
+Privacy policy:  https://<user>.github.io/<repo>/privacy.html
+Terms:           https://<user>.github.io/<repo>/terms.html
+```
+
+Both documents contain `[YOUR …]` placeholders — name, contact email, repository
+URL, governing jurisdiction. The build prints a warning while any remain. Fill
+them in before submitting for verification; Google rejects policies with
+template text.
+
 ### One thing to know about sharing it
 
 The page is public, but the data isn't: visitors sign in with their own Google

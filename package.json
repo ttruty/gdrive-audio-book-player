@@ -8,9 +8,10 @@
     "start": "ng serve",
     "build": "ng build",
     "serve": "ionic serve",
-    "serve:pwa": "ng build && node tools/serve-dist.mjs",
+    "serve:pwa": "npm run build && node tools/serve-dist.mjs",
     "serve:dist": "node tools/serve-dist.mjs",
-    "build:ghpages": "ng build --base-href /gdrive-audio-book-player/ && node tools/gh-pages-prep.mjs"
+    "build:ghpages": "npm run build -- --base-href /gdrive-audio-book-player/ && node tools/gh-pages-prep.mjs",
+    "postbuild": "node tools/build-legal.mjs"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",
