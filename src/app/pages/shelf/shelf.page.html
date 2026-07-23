@@ -51,17 +51,9 @@
   <!-- Install offer, where it can actually be found. -->
   <app-install-banner />
 
-  <!-- ── not signed in ──────────────────────────────────────────────────── -->
+  <!-- ── not signed in: the public home page ────────────────────────────── -->
   @if (!auth.isSignedIn() && !hasLibrary()) {
-    <div class="yb-empty">
-      <div class="yb-empty-glyph">{{ t().welcomeGlyph }}</div>
-      <h2>{{ t().welcomeTitle }}</h2>
-      <p>{{ t().welcomeBody }}</p>
-      <ion-button class="ion-margin-top" (click)="signIn()">
-        <ion-icon slot="start" name="log-in-outline" />
-        {{ t().signIn }} with Google
-      </ion-button>
-    </div>
+    <app-landing (signIn)="signIn()" />
   }
 
   <!-- ── signed in, empty hold ──────────────────────────────────────────── -->

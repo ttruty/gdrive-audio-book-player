@@ -1,6 +1,6 @@
 {
   "id": "./",
-  "name": "Yarnbeard — Audiobooks from yer Drive",
+  "name": "Yarnbeard — Audiobook Player for Google Drive",
   "short_name": "Yarnbeard",
   "description": "An audiobook player for Google Drive: per-book resume, bookmarks, embedded .m4b chapters, offline downloads, and notes saved back to Drive.",
   "theme_color": "#0d1f2b",

@@ -12,7 +12,7 @@
     <meta name="format-detection" content="telephone=no" />
     <meta
       name="description"
-      content="Yarnbeard — plunder yer audiobooks from the Google Drive seas."
+      content="Yarnbeard is an audiobook player for Google Drive. Play the audio files you keep in your own Drive, resume every book where you left off, and save bookmarks and notes."
     />
     <!-- SVG first for crisp tabs at any density; PNG for browsers that won't. -->
     <link rel="icon" type="image/svg+xml" href="icons/flag.svg" />
@@ -54,6 +54,40 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
-    <app-root></app-root>
+    <!--
+      This content inside <app-root> is what the served HTML contains before the
+      app boots — Angular replaces it on startup. It exists so that a visitor,
+      or an automated reviewer, sees the app's name and purpose stated plainly
+      even with JavaScript disabled or still loading. Do not remove it: it is
+      part of what satisfies OAuth homepage verification.
+    -->
+    <app-root>
+      <main style="max-width: 40rem; margin: 0 auto; padding: 40px 22px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #ece2cd; background: #0d1f2b;">
+        <h1 style="font-family: Georgia, serif;">Yarnbeard</h1>
+        <p><strong>An audiobook player for your Google Drive.</strong></p>
+        <p>
+          Yarnbeard plays the audiobooks and audio files you already keep in your
+          own Google Drive, and remembers exactly where you left off in every
+          book — along with your bookmarks and notes. It runs entirely in your
+          web browser; there is no separate account and no server storing your
+          data.
+        </p>
+        <p>
+          Sign in with your Google account to open your Drive and choose which
+          folders to add. Yarnbeard reads only the folders you point it at, so it
+          can play the audio inside them, and saves your progress and notes to a
+          private area of your own Drive.
+        </p>
+        <p>
+          <a href="privacy.html" style="color: #d9a441;">Privacy Policy</a> &middot;
+          <a href="terms.html" style="color: #d9a441;">Terms of Service</a>
+        </p>
+        <noscript>
+          <p style="color: #d9a441;">
+            Yarnbeard needs JavaScript enabled to sign in and play your books.
+          </p>
+        </noscript>
+      </main>
+    </app-root>
   </body>
 </html>

@@ -350,6 +350,30 @@ URL, governing jurisdiction. The build prints a warning while any remain. Fill
 them in before submitting for verification; Google rejects policies with
 template text.
 
+### Passing OAuth verification
+
+Google's reviewer checks two things about the home page. Both are handled in the
+app, but one has a matching setting you must change in the Cloud console:
+
+1. **The home page must explain the app's purpose.** The signed-out home page
+   (`src/app/components/landing.component.ts`) states the name and purpose
+   plainly, lists what the app does, describes exactly what it accesses in your
+   Google account, and links the privacy policy and terms. Because the reviewer
+   may fetch the page *without running JavaScript*, `index.html` also carries the
+   same name, purpose and policy links as static pre-boot content and a
+   plain-language `<meta name="description">` — so the served HTML explains
+   itself even before Angular loads.
+
+2. **The app name must match.** The app is named **`Yarnbeard`** everywhere — the
+   `<h1>`, the `<title>`, the manifest `short_name`. In the Cloud console, set
+   **OAuth consent screen → App name** to exactly `Yarnbeard` (the earlier
+   rejection was for `YarnBeard` — the capital B did not match). Also set
+   **Application home page** to your deployed root URL, and the
+   **Privacy policy** and **Terms of service** links to the `privacy.html` and
+   `terms.html` URLs on that same origin.
+
+After changing the consent screen, submit for verification again.
+
 ### One thing to know about sharing it
 
 The page is public, but the data isn't: visitors sign in with their own Google

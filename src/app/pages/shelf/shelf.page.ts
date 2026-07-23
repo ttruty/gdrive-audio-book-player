@@ -35,6 +35,7 @@ import {
 
 import { BookCoverComponent } from '../../components/book-cover.component';
 import { InstallBannerComponent } from '../../components/install-banner.component';
+import { LandingComponent } from '../../components/landing.component';
 import { CopyService } from '../../services/copy.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { LibraryService } from '../../services/library.service';
@@ -68,6 +69,7 @@ import { humanDuration, relativeTime } from '../../util/format';
     IonSpinner,
     BookCoverComponent,
     InstallBannerComponent,
+    LandingComponent,
   ],
 })
 export class ShelfPage {
