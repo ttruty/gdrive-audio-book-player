@@ -20,11 +20,9 @@ We collect nothing. We store nothing about you. We sell and share nothing.
 
 ## Who operates this app
 
-Yarnbeard is a free, open-source, personal project operated by **[YOUR NAME]**.
+Yarnbeard is a free, open-source, personal project operated by **Timothy Truty**.
 
-Contact: **[YOUR CONTACT EMAIL]**
-
-Source code: **[YOUR REPOSITORY URL]**
+Contact: **ttruty@gmail.com**
 
 ---
 
@@ -188,4 +186,4 @@ handled will be reflected before the change takes effect.
 
 Questions about this policy or about your data:
 
-**[YOUR CONTACT EMAIL]**
+**ttruty@gmail.com**

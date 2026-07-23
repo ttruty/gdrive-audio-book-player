@@ -11,8 +11,8 @@
 By using Yarnbeard ("the app"), you agree to these terms. If you do not agree,
 please do not use it.
 
-The app is operated by **[YOUR NAME]** ("we", "us"). Contact:
-**[YOUR CONTACT EMAIL]**.
+The app is operated by **timtruty.com** ("we", "us"). Contact:
+**ttruty@gmail.com**.
 
 ---
 
@@ -147,11 +147,11 @@ account and clearing its data. We may discontinue the app at any time.
 
 ## 13. Governing law
 
-These terms are governed by the laws of **[YOUR COUNTRY / STATE]**, without
+These terms are governed by the laws of **United States of America**, without
 regard to its conflict-of-law rules.
 
 ---
 
 ## 14. Contact
 
-**[YOUR CONTACT EMAIL]**
+**ttruty@gmail.com**
