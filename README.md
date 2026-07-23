@@ -294,6 +294,14 @@ To build the same output locally:
 npm run build:ghpages     # then: npm run serve:dist
 ```
 
+> `package-lock.json` is committed and CI installs with `npm ci`, so the runner
+> builds the exact dependency tree this was developed against. Don't delete it
+> or regenerate it casually: the `^18.2.0` ranges have since drifted such that
+> `@angular-devkit/core` wants `chokidar@^3` while `@angular/compiler-cli` wants
+> `^4`. The locked tree nests them correctly (3.6.0 at the root, 4.0.3 under
+> `compiler-cli`); a fresh resolve hoists v4 and `npm ci` then rejects the tree
+> as invalid.
+
 ### What Pages needs that other hosts don't
 
 Three things, all handled — worth knowing because each one fails in a way that
