@@ -339,6 +339,27 @@ setting for personal use and needs no verification. Opening it to anyone would
 mean publishing the consent screen, and because `drive.readonly` is a
 *restricted* scope, Google requires app verification before it will allow that.
 
+### The icon
+
+A Jolly Roger in the app's own brass-on-navy, generated from a single SVG
+defined in `tools/make-icons.mjs` and rasterised by headless Chrome:
+
+```bash
+node tools/make-icons.mjs      # rewrites src/icons/*
+```
+
+Two families come out of it, which matters more than it sounds:
+
+- `icon-<n>.png` — full-bleed, for the `any` purpose and for iOS, which applies
+  its own rounded-rect mask and needs an opaque edge-to-edge image.
+- `icon-maskable-<n>.png` — the same artwork inset to 62%, so Android's circular
+  and squircle masks crop background rather than the skull. Pointing the
+  `maskable` entries at the full-bleed files (the easy mistake) gets the bones
+  sliced off on most Android launchers.
+
+`icons/flag.svg` is emitted too, and serves as the favicon so browser tabs stay
+crisp at any density.
+
 ### What being installed gets you
 
 - Own icon, full-screen, no address bar.

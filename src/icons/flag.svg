@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="sky" cx="34%" cy="26%" r="82%">
+      <stop offset="0%" stop-color="#16374a"/>
+      <stop offset="62%" stop-color="#0d1f2b"/>
+      <stop offset="100%" stop-color="#071620"/>
+    </radialGradient>
+    <linearGradient id="bone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0d9a4"/>
+      <stop offset="46%" stop-color="#d9a441"/>
+      <stop offset="100%" stop-color="#b98a33"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#sky)"/>
+
+  <g transform="translate(0 0) scale(1)">
+    <!-- Crossbones, behind the skull. A bone is a bar with two knobs per end.
+         They run nearly corner to corner: stubby bones read as four unrelated
+         blobs once the skull covers the crossing point. -->
+    <g fill="url(#bone)">
+      <g transform="rotate(45 256 256)">
+        <rect x="44" y="237" width="424" height="38" rx="19"/>
+        <circle cx="52" cy="228" r="30"/><circle cx="52" cy="284" r="30"/>
+        <circle cx="460" cy="228" r="30"/><circle cx="460" cy="284" r="30"/>
+      </g>
+      <g transform="rotate(-45 256 256)">
+        <rect x="44" y="237" width="424" height="38" rx="19"/>
+        <circle cx="52" cy="228" r="30"/><circle cx="52" cy="284" r="30"/>
+        <circle cx="460" cy="228" r="30"/><circle cx="460" cy="284" r="30"/>
+      </g>
+    </g>
+
+    <!-- Skull. The dark outline is doing real work: without it the skull and
+         the bones behind it are the same brass and merge into one shape. -->
+    <g fill="url(#bone)" stroke="#071620" stroke-width="13" stroke-linejoin="round">
+      <path d="M256 108
+               C196 108,150 152,150 210
+               C150 248,168 277,190 294
+               L322 294
+               C344 277,362 248,362 210
+               C362 152,316 108,256 108 Z"/>
+      <rect x="203" y="286" width="106" height="74" rx="26"/>
+    </g>
+
+    <g fill="#071620">
+      <ellipse cx="212" cy="214" rx="35" ry="39"/>
+      <ellipse cx="300" cy="214" rx="35" ry="39"/>
+      <path d="M256 246 L277 288 L235 288 Z"/>
+      <!-- Teeth: three gaps, wide enough to survive a 72px render. -->
+      <rect x="229" y="292" width="12" height="68" rx="5"/>
+      <rect x="250" y="292" width="12" height="68" rx="5"/>
+      <rect x="271" y="292" width="12" height="68" rx="5"/>
+    </g>
+  </g>
+</svg>
