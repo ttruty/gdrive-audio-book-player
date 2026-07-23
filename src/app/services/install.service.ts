@@ -36,9 +36,10 @@ export class InstallService {
     this.installed.set(this.detectStandalone());
 
     window.addEventListener('beforeinstallprompt', (ev) => {
-      // Suppressing the default keeps Chrome's own mini-infobar from appearing,
-      // so the button in Settings is the single place this is offered.
-      ev.preventDefault();
+      // Deliberately *not* calling preventDefault: suppressing it hides the
+      // browser's own install affordance, and on a phone that leaves no
+      // discoverable way in. Keep the browser's offer and stash the event so
+      // the in-app banner and the Settings button can trigger it as well.
       this.deferred = ev as InstallPromptEvent;
       this.canPrompt.set(true);
     });
@@ -53,18 +54,74 @@ export class InstallService {
   }
 
   private async checkServiceWorker(): Promise<void> {
-    try {
-      if (!('serviceWorker' in navigator)) return;
-      if (navigator.serviceWorker.controller) {
-        this.serviceWorkerActive.set(true);
+    // Registration is deferred until the app settles, so poll briefly rather
+    // than reading once and concluding it will never happen.
+    for (let i = 0; i < 20; i++) {
+      try {
+        if (!('serviceWorker' in navigator)) return;
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (navigator.serviceWorker.controller || reg?.active) {
+          this.serviceWorkerActive.set(true);
+          return;
+        }
+      } catch {
         return;
       }
-      // Registration is deferred until the app is stable, so look again later.
-      const reg = await navigator.serviceWorker.getRegistration();
-      this.serviceWorkerActive.set(!!reg?.active);
-    } catch {
-      /* ignore */
+      await new Promise((r) => setTimeout(r, 1000));
     }
+  }
+
+  /**
+   * What the browser needs before it will install, and whether we have it.
+   * Surfaced in Settings so a phone that refuses to install can say why —
+   * otherwise it's guesswork on a device with no console.
+   */
+  async diagnostics(): Promise<{ label: string; ok: boolean; detail: string }[]> {
+    const secure = typeof window !== 'undefined' && window.isSecureContext;
+    const httpsish =
+      typeof location !== 'undefined' &&
+      (location.protocol === 'https:' || location.hostname === 'localhost');
+
+    let manifestOk = false;
+    let manifestDetail = 'no <link rel="manifest">';
+    try {
+      const href = document.querySelector<HTMLLinkElement>('link[rel=manifest]')?.href;
+      if (href) {
+        const res = await fetch(href);
+        manifestOk = res.ok;
+        manifestDetail = res.ok ? new URL(href).pathname : `HTTP ${res.status}`;
+      }
+    } catch {
+      manifestDetail = 'could not be fetched';
+    }
+
+    let swDetail = 'not registered';
+    try {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg?.active) swDetail = `active, scope ${new URL(reg.scope).pathname}`;
+      else if (reg) swDetail = 'registered but not yet active';
+    } catch {
+      swDetail = 'unavailable';
+    }
+
+    return [
+      {
+        label: 'Secure connection',
+        ok: secure && httpsish,
+        detail: typeof location !== 'undefined' ? location.protocol.replace(':', '') : '—',
+      },
+      { label: 'App manifest', ok: manifestOk, detail: manifestDetail },
+      { label: 'Service worker', ok: this.serviceWorkerActive(), detail: swDetail },
+      {
+        label: 'Browser can install',
+        ok: this.canPrompt() || this.isIos(),
+        detail: this.isIos()
+          ? 'iOS — manual, via Share'
+          : this.canPrompt()
+            ? 'ready'
+            : 'no install offer from this browser',
+      },
+    ];
   }
 
   /** True once the app is running from the home screen rather than a tab. */

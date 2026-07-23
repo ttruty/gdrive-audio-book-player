@@ -21,6 +21,7 @@ import {
 import { addIcons } from 'ionicons';
 import {
   checkmarkCircle,
+  closeCircle,
   cloudDoneOutline,
   cloudOfflineOutline,
   cloudUploadOutline,
@@ -96,6 +97,8 @@ export class ChartsPage {
 
   readonly storageUsed = signal<string>('');
   readonly persistent = signal<boolean | null>(null);
+  readonly showDiagnostics = signal(false);
+  readonly diagnostics = signal<{ label: string; ok: boolean; detail: string }[]>([]);
 
   readonly stowedCount = computed(() => this.offline.cachedIds().size);
   readonly keptCount = computed(() => this.offline.keptCount());
@@ -121,6 +124,7 @@ export class ChartsPage {
   constructor() {
     addIcons({
       checkmarkCircle,
+      closeCircle,
       logOutOutline,
       cloudDoneOutline,
       cloudOfflineOutline,
@@ -247,6 +251,12 @@ export class ChartsPage {
 
   setTheme(mode: ThemeMode): void {
     this.settings.mode.set(mode);
+  }
+
+  async toggleDiagnostics(): Promise<void> {
+    const next = !this.showDiagnostics();
+    this.showDiagnostics.set(next);
+    if (next) this.diagnostics.set(await this.install.diagnostics());
   }
 
   async doInstall(): Promise<void> {

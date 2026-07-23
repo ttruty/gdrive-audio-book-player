@@ -409,19 +409,44 @@
             <h3>{{ t().installTitle }}</h3>
             @if (!install.serviceWorkerActive()) {
               <p>
-                Not available on this address. The install option needs the
-                production build served over HTTPS or localhost — the dev server
-                runs without a service worker. Try
-                <code>npm run serve:pwa</code>.
+                Not available on this address. Installing needs the production
+                build over HTTPS or localhost — the dev server runs without a
+                service worker. Try <code>npm run serve:pwa</code>.
               </p>
             } @else {
               <p>
-                This browser doesn't support installing web apps. Chrome, Edge
-                or Safari will.
+                This browser hasn't offered to install. The checks below show
+                what it can see.
               </p>
             }
           </ion-label>
         </ion-item>
+      }
+    }
+
+    <!-- Always available: a phone has no console, so the app has to be able
+         to explain itself when installing doesn't work. -->
+    @if (!install.installed()) {
+      <ion-item lines="none" button (click)="toggleDiagnostics()">
+        <ion-label>
+          <p>{{ showDiagnostics() ? 'Hide' : 'Why can’t I install?' }}</p>
+        </ion-label>
+      </ion-item>
+
+      @if (showDiagnostics()) {
+        @for (row of diagnostics(); track row.label) {
+          <ion-item lines="none">
+            <ion-icon
+              slot="start"
+              [name]="row.ok ? 'checkmark-circle' : 'close-circle'"
+              [color]="row.ok ? 'success' : 'danger'"
+            />
+            <ion-label>
+              <h3>{{ row.label }}</h3>
+              <p>{{ row.detail }}</p>
+            </ion-label>
+          </ion-item>
+        }
       }
     }
   </ion-list>

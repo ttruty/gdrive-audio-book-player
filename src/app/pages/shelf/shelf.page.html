@@ -48,6 +48,9 @@
     <ion-refresher-content [pullingText]="t().pullText" [refreshingText]="t().pullBusy" />
   </ion-refresher>
 
+  <!-- Install offer, where it can actually be found. -->
+  <app-install-banner />
+
   <!-- ── not signed in ──────────────────────────────────────────────────── -->
   @if (!auth.isSignedIn() && !hasLibrary()) {
     <div class="yb-empty">
