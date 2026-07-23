@@ -1,0 +1,152 @@
+ion-list {
+  background: transparent;
+  border-radius: 14px;
+  border: 1px solid var(--yb-hairline);
+  overflow: hidden;
+}
+
+ion-item {
+  --background: var(--ion-card-background);
+  --inner-padding-end: 10px;
+
+  h3 {
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.76rem;
+    line-height: 1.4;
+    color: var(--yb-muted);
+    white-space: normal;
+  }
+}
+
+ion-select {
+  --placeholder-opacity: 1;
+  font-size: 0.92rem;
+  width: 100%;
+}
+
+ion-toggle {
+  width: 100%;
+}
+
+/* ── skin picker ─────────────────────────────────────────────────────────── */
+.skins {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 10px;
+}
+
+.skin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--yb-radius-card);
+  border: 1px solid var(--yb-hairline);
+  background: var(--ion-card-background);
+  color: var(--ion-text-color);
+  text-align: left;
+  cursor: pointer;
+
+  &.on {
+    border-color: var(--ion-color-primary);
+  }
+}
+
+.swatch {
+  flex: 0 0 auto;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--yb-hairline);
+
+  i {
+    display: block;
+    width: 15px;
+    height: 34px;
+  }
+}
+
+.skin-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.skin-name {
+  font-family: var(--yb-heading-family, var(--yb-serif));
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.skin-tick {
+  flex: 0 0 auto;
+  color: var(--ion-color-primary);
+  font-size: 1.25rem;
+}
+
+.theme-row {
+  padding: 0 16px;
+
+  ion-segment {
+    --background: var(--yb-panel);
+    border-radius: 12px;
+    border: 1px solid var(--yb-hairline);
+  }
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color-checked: var(--ion-color-primary-contrast);
+    font-size: 0.72rem;
+    min-height: 36px;
+  }
+}
+
+/* A file input dressed as a button. */
+.file-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--ion-color-primary);
+  font-size: 1.25rem;
+  cursor: pointer;
+
+  input {
+    display: none;
+  }
+}
+
+.about {
+  margin-bottom: 28px;
+
+  .name {
+    font-family: var(--yb-serif);
+    font-size: 1.1rem;
+    margin: 0 0 8px;
+  }
+
+  p {
+    line-height: 1.55;
+  }
+
+  .keys {
+    margin-top: 12px;
+  }
+
+  kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72em;
+    padding: 1px 5px;
+    border-radius: 5px;
+    border: 1px solid var(--yb-hairline);
+    background: var(--yb-panel);
+  }
+}

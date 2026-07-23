@@ -1,0 +1,169 @@
+ion-title .mark {
+  margin-right: 4px;
+}
+
+ion-searchbar {
+  --border-radius: 12px;
+  --box-shadow: none;
+  --background: var(--yb-panel);
+  padding-inline: 12px;
+}
+
+ion-segment {
+  --background: transparent;
+  padding-inline: 8px;
+}
+
+ion-segment-button {
+  --indicator-color: var(--ion-color-primary);
+  --color-checked: var(--ion-color-primary-contrast);
+  font-size: 0.76rem;
+  min-height: 32px;
+}
+
+/* ── continue listening ──────────────────────────────────────────────────── */
+.continue {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--ion-card-background);
+  border: 1px solid var(--yb-rope);
+  cursor: pointer;
+}
+
+.continue-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.continue-title {
+  font-family: var(--yb-serif);
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.continue-status {
+  margin-top: 4px;
+}
+
+.continue-bar {
+  margin-top: 8px;
+}
+
+.continue ion-button {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  font-size: 1.7rem;
+  color: var(--ion-color-primary);
+}
+
+/* ── the shelf list ──────────────────────────────────────────────────────── */
+.shelf {
+  padding: 0 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--yb-hairline);
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.row-title {
+  font-family: var(--yb-serif);
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.row-more {
+  --padding-start: 6px;
+  --padding-end: 6px;
+  color: var(--yb-muted);
+}
+
+.add-more {
+  display: flex;
+  justify-content: center;
+  padding: 20px 16px 8px;
+}
+
+/* ── add sheet ───────────────────────────────────────────────────────────── */
+.intro {
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+.scanning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--yb-muted);
+}
+
+/* ── how-to-read-it choice ───────────────────────────────────────────────── */
+.mode-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mode {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--yb-hairline);
+  background: var(--yb-panel);
+  color: var(--ion-text-color);
+  cursor: pointer;
+
+  .mode-title {
+    font-family: var(--yb-serif);
+    font-size: 0.92rem;
+  }
+
+  .yb-small {
+    color: var(--yb-muted);
+    line-height: 1.4;
+  }
+
+  &.on {
+    border-color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.12);
+
+    .mode-title {
+      color: var(--ion-color-primary);
+      font-weight: 600;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.shelf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--yb-hairline);
+}

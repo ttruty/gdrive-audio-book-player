@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Yarnbeard</title>
+    <base href="/" />
+    <meta name="color-scheme" content="dark light" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta
+      name="description"
+      content="Yarnbeard — plunder yer audiobooks from the Google Drive seas."
+    />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0d1f2b" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Yarnbeard" />
+
+    <!--
+      Apply the saved theme before the first paint. Angular sets these classes
+      too, but not until it has booted — without this the app flashes the wrong
+      skin (and the wrong light/dark mode) for a few hundred milliseconds.
+    -->
+    <script>
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem('yarnbeard.settings.v1') || '{}');
+          var skin = s.skin === 'studio' ? 'studio' : 'pirate';
+          var mode = s.mode || 'system';
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var root = document.documentElement;
+          root.classList.add('yb-skin-' + skin);
+          if (dark) root.classList.add('ion-palette-dark');
+        } catch (e) {
+          document.documentElement.classList.add('yb-skin-pirate');
+        }
+      })();
+    </script>
+
+    <!-- Google Identity Services (OAuth token flow) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

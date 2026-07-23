@@ -1,0 +1,227 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Two skins, each with a light and a dark mode.
+
+     yb-skin-pirate  — brass, parchment and deep water; serif headings
+     yb-skin-studio  — charcoal and green; all sans, tight and quiet
+
+   Everything downstream reads these tokens, so a skin is defined entirely
+   here: no component knows which one is active. The `--yb-*` tokens are the
+   app's own; the `--ion-*` ones are what Ionic's components consume.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Shape and type levers the skins move. */
+  --yb-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+    'Times New Roman', serif;
+  --yb-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  --yb-radius-card: 14px;
+  --yb-radius-button: 10px;
+  /* --yb-cover-radius is deliberately left undefined here: the cover component
+     falls back to a radius that scales with the tile, and only the studio skin
+     pins it to a flat corner. Declaring it empty would kill that fallback. */
+  --yb-legend-transform: uppercase;
+  --yb-legend-spacing: 0.18em;
+  --yb-legend-size: 0.72rem;
+  --yb-legend-weight: 400;
+  --yb-legend-family: var(--yb-serif);
+  --yb-legend-color: var(--yb-muted);
+  --yb-legend-rule: 1px;
+  --yb-wash: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PIRATE — the original ship's colours
+   ═══════════════════════════════════════════════════════════════════════════ */
+.yb-skin-pirate {
+  /* Brass / lantern gold — the primary action colour. */
+  --ion-color-primary: #d9a441;
+  --ion-color-primary-rgb: 217, 164, 65;
+  --ion-color-primary-contrast: #1b1206;
+  --ion-color-primary-contrast-rgb: 27, 18, 6;
+  --ion-color-primary-shade: #bf9039;
+  --ion-color-primary-tint: #ddad54;
+
+  --ion-color-secondary: #3d9199;
+  --ion-color-secondary-rgb: 61, 145, 153;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #368087;
+  --ion-color-secondary-tint: #509ca3;
+
+  /* Sealing-wax red — destructive. */
+  --ion-color-danger: #b23a2e;
+  --ion-color-danger-rgb: 178, 58, 46;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #9d3328;
+  --ion-color-danger-tint: #ba4e43;
+
+  --ion-color-success: #4e8d5b;
+  --ion-color-success-rgb: 78, 141, 91;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #457c50;
+  --ion-color-success-tint: #60986b;
+
+  --ion-color-warning: #c98a2b;
+  --ion-color-warning-rgb: 201, 138, 43;
+  --ion-color-warning-contrast: #1b1206;
+  --ion-color-warning-contrast-rgb: 27, 18, 6;
+  --ion-color-warning-shade: #b17926;
+  --ion-color-warning-tint: #ce9640;
+
+  --yb-rope: rgba(217, 164, 65, 0.28);
+  --yb-legend-family: var(--yb-serif);
+  --yb-heading-family: var(--yb-serif);
+
+  /* A faint lantern-and-sea wash behind every page. */
+  --yb-wash: radial-gradient(circle at 20% 8%, rgba(217, 164, 65, 0.1), transparent 42%)
+      no-repeat,
+    radial-gradient(circle at 88% 82%, rgba(61, 145, 153, 0.1), transparent 48%)
+      no-repeat;
+
+  /* Light — "old chart" */
+  --ion-background-color: #f4ead2;
+  --ion-background-color-rgb: 244, 234, 210;
+  --ion-text-color: #2b2116;
+  --ion-text-color-rgb: 43, 33, 22;
+  --ion-toolbar-background: #e8d9b6;
+  --ion-item-background: #faf3e2;
+  --ion-card-background: #faf3e2;
+  --ion-border-color: rgba(43, 33, 22, 0.14);
+  --yb-panel: rgba(43, 33, 22, 0.06);
+  --yb-hairline: rgba(43, 33, 22, 0.12);
+  --yb-muted: rgba(43, 33, 22, 0.62);
+}
+
+/* Dark — "night watch" */
+.yb-skin-pirate.ion-palette-dark {
+  --ion-background-color: #0d1f2b;
+  --ion-background-color-rgb: 13, 31, 43;
+  --ion-text-color: #ece2cd;
+  --ion-text-color-rgb: 236, 226, 205;
+  --ion-toolbar-background: #102633;
+  --ion-item-background: #13303f;
+  --ion-card-background: #13303f;
+  --ion-border-color: rgba(236, 226, 205, 0.14);
+
+  --yb-panel: rgba(236, 226, 205, 0.06);
+  --yb-hairline: rgba(236, 226, 205, 0.12);
+  --yb-muted: rgba(236, 226, 205, 0.6);
+
+  --ion-color-step-50: #142935;
+  --ion-color-step-100: #1a3140;
+  --ion-color-step-150: #21394a;
+  --ion-color-step-200: #284154;
+  --ion-color-step-250: #2f495e;
+  --ion-color-step-300: #365168;
+  --ion-color-step-350: #3d5972;
+  --ion-color-step-400: #44617c;
+  --ion-color-step-500: #526f8a;
+  --ion-color-step-600: #6d8699;
+  --ion-color-step-700: #8b9fae;
+  --ion-color-step-800: #aab9c3;
+  --ion-color-step-900: #cbd4d9;
+  --ion-color-step-950: #e5eaed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STUDIO — charcoal, green and plain sans. Gets out of the way.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.yb-skin-studio {
+  --ion-color-primary: #1db954;
+  --ion-color-primary-rgb: 29, 185, 84;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #1aa34a;
+  --ion-color-primary-tint: #34c065;
+
+  --ion-color-secondary: #509bf5;
+  --ion-color-secondary-rgb: 80, 155, 245;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0, 0, 0;
+  --ion-color-secondary-shade: #4788d8;
+  --ion-color-secondary-tint: #62a5f6;
+
+  --ion-color-danger: #e22134;
+  --ion-color-danger-rgb: 226, 33, 52;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #c71d2e;
+  --ion-color-danger-tint: #e53748;
+
+  --ion-color-success: #1db954;
+  --ion-color-success-rgb: 29, 185, 84;
+  --ion-color-success-contrast: #000000;
+  --ion-color-success-contrast-rgb: 0, 0, 0;
+  --ion-color-success-shade: #1aa34a;
+  --ion-color-success-tint: #34c065;
+
+  --ion-color-warning: #f0a500;
+  --ion-color-warning-rgb: 240, 165, 0;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #d39100;
+  --ion-color-warning-tint: #f2ae1a;
+
+  /* No serif, no rope, no wash — the studio look is flat and quiet. */
+  --yb-serif: var(--yb-sans);
+  --yb-heading-family: var(--yb-sans);
+  --yb-legend-family: var(--yb-sans);
+  --yb-legend-transform: none;
+  --yb-legend-spacing: 0;
+  --yb-legend-size: 1.05rem;
+  --yb-legend-weight: 700;
+  --yb-legend-color: var(--ion-text-color);
+  --yb-legend-rule: 0;
+  --yb-wash: none;
+  --yb-rope: transparent;
+  --yb-radius-card: 8px;
+  --yb-radius-button: 500px;
+  --yb-cover-radius: 4px;
+
+  /* Light */
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: #121212;
+  --ion-text-color-rgb: 18, 18, 18;
+  --ion-toolbar-background: #ffffff;
+  --ion-item-background: #f7f7f7;
+  --ion-card-background: #f7f7f7;
+  --ion-border-color: rgba(0, 0, 0, 0.1);
+  --yb-panel: rgba(0, 0, 0, 0.045);
+  --yb-hairline: rgba(0, 0, 0, 0.1);
+  --yb-muted: #6a6a6a;
+}
+
+/* Dark — the one most people will want. */
+.yb-skin-studio.ion-palette-dark {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  --ion-toolbar-background: #121212;
+  --ion-item-background: #181818;
+  --ion-card-background: #181818;
+  --ion-border-color: rgba(255, 255, 255, 0.1);
+
+  --yb-panel: #282828;
+  --yb-hairline: rgba(255, 255, 255, 0.09);
+  --yb-muted: #b3b3b3;
+
+  --ion-color-step-50: #1a1a1a;
+  --ion-color-step-100: #1f1f1f;
+  --ion-color-step-150: #242424;
+  --ion-color-step-200: #282828;
+  --ion-color-step-250: #2f2f2f;
+  --ion-color-step-300: #363636;
+  --ion-color-step-350: #3d3d3d;
+  --ion-color-step-400: #444444;
+  --ion-color-step-500: #535353;
+  --ion-color-step-600: #6e6e6e;
+  --ion-color-step-700: #8c8c8c;
+  --ion-color-step-800: #a7a7a7;
+  --ion-color-step-900: #c9c9c9;
+  --ion-color-step-950: #e6e6e6;
+}

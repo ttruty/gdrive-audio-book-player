@@ -1,0 +1,165 @@
+ion-searchbar {
+  --border-radius: 12px;
+  --box-shadow: none;
+  --background: var(--yb-panel);
+  padding-inline: 12px;
+}
+
+ion-segment {
+  --background: transparent;
+  padding-inline: 12px;
+}
+
+ion-segment-button {
+  --indicator-color: var(--ion-color-primary);
+  --color-checked: var(--ion-color-primary-contrast);
+  font-size: 0.78rem;
+  min-height: 32px;
+}
+
+/* ── log rows ────────────────────────────────────────────────────────────── */
+.row {
+  margin: 10px 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--ion-card-background);
+  border: 1px solid var(--yb-hairline);
+  cursor: pointer;
+}
+
+.row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.book {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--yb-serif);
+  font-size: 0.82rem;
+  color: var(--ion-color-primary);
+}
+
+.stamp {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--yb-rope);
+  color: var(--yb-muted);
+}
+
+.body {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.body.one-line {
+  white-space: nowrap;
+}
+
+.row-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+
+  .spacer {
+    flex: 1;
+  }
+
+  ion-button {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    margin: 0;
+    height: 26px;
+  }
+}
+
+/* ── voyage stats ────────────────────────────────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+
+.stat {
+  text-align: center;
+  padding: 14px 6px;
+  border-radius: 14px;
+  background: var(--ion-card-background);
+  border: 1px solid var(--yb-hairline);
+
+  .value {
+    font-family: var(--yb-serif);
+    font-size: 1.24rem;
+    color: var(--ion-color-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .label {
+    margin-top: 3px;
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: var(--yb-muted);
+  }
+}
+
+/* ── the fortnight chart ─────────────────────────────────────────────────── */
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 130px;
+  padding: 0 16px 4px;
+}
+
+.col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(
+    180deg,
+    var(--ion-color-primary),
+    var(--ion-color-primary-shade)
+  );
+
+  &.zero {
+    background: var(--yb-hairline);
+  }
+}
+
+.tick {
+  margin-top: 6px;
+  font-size: 0.62rem;
+}
+
+.shelf-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 0.88rem;
+
+  & + .shelf-line {
+    border-top: 1px solid var(--yb-hairline);
+  }
+}

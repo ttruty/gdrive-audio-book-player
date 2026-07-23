@@ -1,0 +1,159 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>{{ t().notesTab }}</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment
+      [value]="panel()"
+      (ionChange)="panel.set($any($event.detail.value))"
+    >
+      <ion-segment-button value="entries">{{ t().entriesTab }}</ion-segment-button>
+      <ion-segment-button value="marks">{{ t().marksTab }}</ion-segment-button>
+      <ion-segment-button value="voyage">{{ t().statsTab }}</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
+  @if (panel() !== 'voyage') {
+    <ion-toolbar>
+      <ion-searchbar
+        [placeholder]="t().logSearchPlaceholder"
+        [value]="query()"
+        (ionInput)="query.set($any($event.target).value ?? '')"
+      />
+    </ion-toolbar>
+  }
+</ion-header>
+
+<ion-content class="yb-grain has-mini">
+  <!-- ── entries ────────────────────────────────────────────────────────── -->
+  @if (panel() === 'entries') {
+    @if (!entries().length) {
+      <div class="yb-empty">
+        <div class="yb-empty-glyph">{{ t().noNotesGlyph }}</div>
+        <h2>{{ query() ? t().noMatchTitle : t().logEmptyTitle }}</h2>
+        <p>{{ t().logEmptyBody }}</p>
+      </div>
+    }
+
+    @for (row of entries(); track row.id) {
+      <div class="row" (click)="jump(row)">
+        <div class="row-head">
+          <span class="book yb-truncate" (click)="openBook(row, $event)">
+            {{ row.bookTitle }}
+          </span>
+          <span class="stamp yb-tabular">{{ clock(row.position) }}</span>
+        </div>
+        <div class="body">{{ row.text }}</div>
+        <div class="row-foot yb-small yb-muted">
+          <span class="yb-truncate">{{ row.chapterName }}</span>
+          <span>·</span>
+          <span>{{ relative(row.at) }}</span>
+          <span class="spacer"></span>
+          <ion-button fill="clear" size="small" (click)="edit(row, $event)">
+            <ion-icon slot="icon-only" name="create" />
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="remove(row, $event)">
+            <ion-icon slot="icon-only" name="trash-outline" />
+          </ion-button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ── marks ──────────────────────────────────────────────────────────── -->
+  @if (panel() === 'marks') {
+    @if (!marks().length) {
+      <div class="yb-empty">
+        <div class="yb-empty-glyph">{{ t().noMarksGlyph }}</div>
+        <h2>{{ query() ? t().noMatchTitle : t().noMarksTitle }}</h2>
+        <p>{{ t().noMarksBody }}</p>
+      </div>
+    }
+
+    @for (row of marks(); track row.id) {
+      <div class="row compact" (click)="jump(row)">
+        <div class="row-head">
+          <span class="book yb-truncate" (click)="openBook(row, $event)">
+            {{ row.bookTitle }}
+          </span>
+          <span class="stamp yb-tabular">{{ clock(row.position) }}</span>
+        </div>
+        <div class="body one-line yb-truncate">{{ row.text }}</div>
+        <div class="row-foot yb-small yb-muted">
+          <span class="yb-truncate">{{ row.chapterName }}</span>
+          <span>·</span>
+          <span>{{ relative(row.at) }}</span>
+          <span class="spacer"></span>
+          <ion-button fill="clear" size="small" (click)="edit(row, $event)">
+            <ion-icon slot="icon-only" name="create" />
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="remove(row, $event)">
+            <ion-icon slot="icon-only" name="trash-outline" />
+          </ion-button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ── voyage ─────────────────────────────────────────────────────────── -->
+  @if (panel() === 'voyage') {
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="value">{{ human(stats.totalSeconds()) }}</div>
+        <div class="label">{{ t().statTotal }}</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ stats.streak() }}</div>
+        <div class="label">{{ t().statStreak }}</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ human(stats.today()) }}</div>
+        <div class="label">{{ t().statToday }}</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ finishedCount() }}</div>
+        <div class="label">{{ t().statFinished }}</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ underwayCount() }}</div>
+        <div class="label">{{ t().statUnderway }}</div>
+      </div>
+      <div class="stat">
+        <div class="value">{{ noteCount() }}</div>
+        <div class="label">{{ t().statNotes }}</div>
+      </div>
+    </div>
+
+    <div class="yb-legend">{{ t().chartLegend }}</div>
+    <div class="chart">
+      @for (day of days(); track day.date) {
+        <div class="col" [attr.title]="day.date + ' — ' + human(day.seconds)">
+          <div class="bar-wrap">
+            <div
+              class="bar"
+              [style.height.%]="barHeight(day)"
+              [class.zero]="day.seconds === 0"
+            ></div>
+          </div>
+          <div class="tick yb-small yb-muted">{{ dayInitial(day) }}</div>
+        </div>
+      }
+    </div>
+
+    <div class="yb-panel">
+      <p class="yb-small yb-muted">{{ t().statsNote }}</p>
+    </div>
+
+    <div class="yb-rope"></div>
+
+    <div class="yb-panel">
+      <div class="shelf-line">
+        <span>{{ t().booksInLibrary }}</span><span class="yb-tabular">{{ totalBooks() }}</span>
+      </div>
+      <div class="shelf-line">
+        <span>{{ t().marksDropped }}</span><span class="yb-tabular">{{ marks().length }}</span>
+      </div>
+    </div>
+  }
+</ion-content>

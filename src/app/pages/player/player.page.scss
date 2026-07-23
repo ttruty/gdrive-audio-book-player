@@ -1,0 +1,375 @@
+.helm-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--yb-muted);
+}
+
+.helm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 20px 32px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ── cover ───────────────────────────────────────────────────────────────── */
+.art {
+  position: relative;
+  margin-top: 6px;
+}
+
+.art-veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 28px;
+}
+
+/* Download ring: a conic sweep with a punched-out middle for the number.
+   --p is the whole-percent value, set inline. */
+.ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(
+    var(--ion-color-primary) calc(var(--p, 0) * 1%),
+    rgba(255, 255, 255, 0.2) 0
+  );
+  transition: background 0.2s linear;
+}
+
+.ring-hole {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 10, 10, 0.86);
+}
+
+.ring-pct {
+  font-family: var(--yb-heading-family, var(--yb-serif));
+  font-size: 1.32rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.dl-bytes {
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.02em;
+}
+
+/* ── titles ──────────────────────────────────────────────────────────────── */
+.titles {
+  text-align: center;
+  margin-top: 22px;
+  width: 100%;
+}
+
+.chapter-title {
+  font-family: var(--yb-serif);
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+.book-title {
+  margin-top: 5px;
+  color: var(--ion-color-primary);
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.titles .yb-small {
+  margin-top: 6px;
+}
+
+.error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(var(--ion-color-danger-rgb), 0.14);
+  color: var(--ion-color-danger);
+  text-align: center;
+}
+
+/* ── scrubber ────────────────────────────────────────────────────────────── */
+.scrub {
+  width: 100%;
+  margin-top: 18px;
+}
+
+ion-range {
+  --bar-height: 4px;
+  --bar-background: var(--yb-hairline);
+  --bar-background-active: var(--ion-color-primary);
+  --knob-size: 16px;
+  --knob-background: var(--ion-color-primary);
+  padding: 0 6px;
+}
+
+.times {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  margin-top: -4px;
+}
+
+.speed-note {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+/* ── transport ───────────────────────────────────────────────────────────── */
+.transport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.t {
+  border: none;
+  background: transparent;
+  color: var(--ion-text-color);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+
+  &:disabled {
+    opacity: 0.28;
+  }
+}
+
+.t.ghost {
+  width: 44px;
+  height: 44px;
+  font-size: 1.15rem;
+  color: var(--yb-muted);
+}
+
+.t.skip {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  font-size: 1.5rem;
+
+  span {
+    position: absolute;
+    bottom: 7px;
+    font-size: 0.56rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
+  }
+}
+
+.t.main {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-size: 2rem;
+  box-shadow: 0 6px 18px rgba(var(--ion-color-primary-rgb), 0.3);
+
+  ion-spinner {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ── tool row ────────────────────────────────────────────────────────────── */
+.tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  margin-top: 28px;
+}
+
+.tool {
+  flex: 1;
+  border: 1px solid var(--yb-hairline);
+  border-radius: 12px;
+  background: var(--yb-panel);
+  color: var(--ion-text-color);
+  padding: 9px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 1.15rem;
+  }
+
+  span {
+    font-size: 0.64rem;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.on {
+    border-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+  }
+}
+
+/* ── marks strip ─────────────────────────────────────────────────────────── */
+.marks {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--yb-hairline);
+  background: transparent;
+  color: var(--ion-text-color);
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+
+  > span:first-child {
+    color: var(--ion-color-primary);
+    font-size: 0.74rem;
+  }
+}
+
+/* ── sheets ──────────────────────────────────────────────────────────────── */
+.speed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 12px 4px;
+  border-radius: 12px;
+  border: 1px solid var(--yb-hairline);
+  background: var(--yb-panel);
+  color: var(--ion-text-color);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &.on {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    border-color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+
+  /* The duration ye usually reach for, marked but not selected. */
+  &.usual {
+    border-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+  }
+}
+
+.fine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+
+  .current {
+    font-family: var(--yb-serif);
+    font-size: 1.3rem;
+    min-width: 64px;
+    text-align: center;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--yb-hairline);
+  margin-top: 8px;
+
+  > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.boost-btns {
+  display: flex;
+  flex: 0 0 auto;
+
+  ion-button {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
+  }
+}
+
+.sheet-list {
+  padding: 4px 0 24px;
+}
+
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-bottom: 1px solid var(--yb-hairline);
+  background: transparent;
+  color: var(--ion-text-color);
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  .n {
+    flex: 0 0 auto;
+    width: 26px;
+    color: var(--yb-muted);
+    font-size: 0.8rem;
+  }
+
+  .t {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .done {
+    color: var(--ion-color-success);
+  }
+
+  &.on {
+    background: rgba(var(--ion-color-primary-rgb), 0.12);
+
+    .t {
+      color: var(--ion-color-primary);
+      font-weight: 600;
+    }
+  }
+}

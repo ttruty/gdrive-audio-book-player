@@ -1,0 +1,230 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/hold" [text]="t().libraryTab" />
+    </ion-buttons>
+    <ion-title class="yb-truncate">{{ book()?.title }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="actions()" aria-label="Book actions">
+        <ion-icon slot="icon-only" name="ellipsis-horizontal" />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="yb-grain has-mini">
+  @if (book(); as b) {
+    <!-- ── the plate ────────────────────────────────────────────────────── -->
+    <div class="plate">
+      <app-cover
+        [bookId]="b.id"
+        [title]="b.title"
+        [size]="128"
+        [finished]="finished()"
+      />
+      <div class="plate-text">
+        <h1>{{ b.title }}</h1>
+        @if (b.author) {
+          <div class="author">{{ b.author }}</div>
+        }
+        <div class="yb-small yb-muted facts">
+          {{ b.chapters.length }} chapters
+          @if (totalTime() > 0) {
+            · {{ human(totalTime()) }}
+          }
+          @if (b.embeddedChapters) {
+            · chapters in file
+          }
+          @if (fullyStowed()) {
+            · {{ t().stowedWord }}
+          } @else if (fullyCached()) {
+            · {{ t().keptWord }}
+          } @else if (cached() > 0) {
+            · {{ cached() }}/{{ fileIds().length }} {{ t().keptWord }}
+          }
+        </div>
+        @if (b.tags?.length) {
+          <div class="tags">
+            @for (tag of b.tags; track tag) {
+              <span class="tag">{{ tag }}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── progress + resume ────────────────────────────────────────────── -->
+    <div class="progress-block">
+      <div class="yb-bar"><span [style.width.%]="percent() * 100"></span></div>
+      <div class="progress-line yb-small yb-muted">
+        <span>{{ (percent() * 100).toFixed(0) }}% through</span>
+        @if (remaining() > 0) {
+          <span>{{ human(remaining()) }} left</span>
+        }
+      </div>
+    </div>
+
+    <div class="cta">
+      <ion-button expand="block" (click)="resume()">
+        <ion-icon slot="start" name="play-circle" />
+        {{ finished() ? t().relisten : started() ? t().resume : t().start }}
+      </ion-button>
+
+      <div class="cta-row">
+        <ion-button fill="outline" size="small" (click)="addNote()">
+          <ion-icon slot="start" name="create" />
+          {{ t().addNote }}
+        </ion-button>
+
+        @if (stowJob(); as job) {
+          <ion-button fill="outline" size="small" color="danger" (click)="cancelStow()">
+            <ion-spinner name="dots" />
+            &nbsp;{{ job.done }}/{{ job.total }} — stop
+          </ion-button>
+        } @else {
+          <ion-button fill="outline" size="small" (click)="stow()">
+            <ion-icon slot="start" name="cloud-download-outline" />
+            {{ fullyStowed() ? t().unstow : t().stow }}
+          </ion-button>
+        }
+      </div>
+    </div>
+
+    @if (busy()) {
+      <ion-progress-bar type="indeterminate" />
+    }
+
+    <!-- ── panels ───────────────────────────────────────────────────────── -->
+    <ion-segment
+      class="panels"
+      [value]="panel()"
+      (ionChange)="panel.set($any($event.detail.value))"
+    >
+      <ion-segment-button value="chapters">{{ t().chaptersPanel }}</ion-segment-button>
+      <ion-segment-button value="marks">
+        {{ t().marksPanel }} ({{ marks().length }})
+      </ion-segment-button>
+      <ion-segment-button value="log">
+        {{ t().notesPanel }} ({{ entries().length }})
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- ── chapters ─────────────────────────────────────────────────────── -->
+    @if (panel() === 'chapters') {
+      <div class="list">
+        @for (chapter of b.chapters; track chapter.id) {
+          <div
+            class="chapter"
+            [class.playing]="chapterPlaying(chapter)"
+            (click)="playChapter(chapter)"
+          >
+            <div class="num">
+              @if (chapterDone(chapter)) {
+                <ion-icon name="checkmark-circle" class="done" />
+              } @else if (chapterPlaying(chapter)) {
+                <ion-icon name="volume-high" class="live" />
+              } @else {
+                {{ chapter.index + 1 }}
+              }
+            </div>
+
+            <div class="chapter-text">
+              <div class="yb-truncate chapter-title">{{ chapter.title }}</div>
+              <div class="yb-small yb-muted chapter-sub">
+                @if (chapterDuration(chapter) > 0) {
+                  <span class="yb-tabular">{{ clock(chapterDuration(chapter)) }}</span>
+                }
+                @if (chapterCached(chapter)) {
+                  <span class="dot">·</span><span>{{ t().stowedWord }}</span>
+                }
+              </div>
+              @if (chapterPercent(chapter) > 0) {
+                <div class="yb-bar chapter-bar">
+                  <span [style.width.%]="chapterPercent(chapter) * 100"></span>
+                </div>
+              }
+            </div>
+
+            <ion-icon name="play" class="go" />
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── marks ────────────────────────────────────────────────────────── -->
+    @if (panel() === 'marks') {
+      @if (!marks().length) {
+        <div class="yb-empty">
+          <div class="yb-empty-glyph">{{ t().noMarksGlyph }}</div>
+          <h2>{{ t().noMarksTitle }}</h2>
+          <p>{{ t().noMarksBody }}</p>
+        </div>
+      }
+      <div class="list">
+        @for (mark of marks(); track mark.id) {
+          <div class="entry" (click)="jump(mark)">
+            <div class="stamp yb-tabular">{{ clock(mark.position) }}</div>
+            <div class="entry-text">
+              <div class="yb-truncate">{{ mark.label }}</div>
+              <div class="yb-small yb-muted yb-truncate">
+                {{ chapterName(mark.chapterIndex) }} · {{ relative(mark.createdAt) }}
+              </div>
+            </div>
+            <ion-button fill="clear" size="small" (click)="$event.stopPropagation(); renameMark(mark)">
+              <ion-icon slot="icon-only" name="create" />
+            </ion-button>
+            <ion-button fill="clear" size="small" color="danger" (click)="$event.stopPropagation(); removeMark(mark)">
+              <ion-icon slot="icon-only" name="trash-outline" />
+            </ion-button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── log ──────────────────────────────────────────────────────────── -->
+    @if (panel() === 'log') {
+      @if (!entries().length) {
+        <div class="yb-empty">
+          <div class="yb-empty-glyph">{{ t().noNotesGlyph }}</div>
+          <h2>{{ t().noNotesTitle }}</h2>
+          <p>{{ t().noNotesBody }}</p>
+        </div>
+      }
+      <div class="list">
+        @for (note of entries(); track note.id) {
+          <div class="entry note" (click)="jump(note)">
+            <div class="stamp yb-tabular">{{ clock(note.position) }}</div>
+            <div class="entry-text">
+              <div class="note-text">{{ note.text }}</div>
+              <div class="yb-small yb-muted yb-truncate">
+                {{ chapterName(note.chapterIndex) }} · {{ relative(note.updatedAt) }}
+              </div>
+            </div>
+            <ion-button fill="clear" size="small" (click)="$event.stopPropagation(); editNote(note)">
+              <ion-icon slot="icon-only" name="create" />
+            </ion-button>
+            <ion-button fill="clear" size="small" color="danger" (click)="$event.stopPropagation(); removeNote(note)">
+              <ion-icon slot="icon-only" name="trash-outline" />
+            </ion-button>
+          </div>
+        }
+      </div>
+
+      @if (entries().length || marks().length) {
+        <div class="export">
+          <ion-button fill="outline" size="small" (click)="exportLog()" [disabled]="busy()">
+            <ion-icon slot="start" name="cloud-download-outline" />
+            {{ t().exportNotes }}
+          </ion-button>
+          <p class="yb-small yb-muted">{{ t().exportHint }}</p>
+        </div>
+      }
+    }
+  } @else {
+    <div class="yb-empty">
+      <div class="yb-empty-glyph">🌫️</div>
+      <h2>Book not found</h2>
+      <p>That book is no longer in your library.</p>
+    </div>
+  }
+</ion-content>

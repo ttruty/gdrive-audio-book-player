@@ -1,0 +1,177 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Yarnbeard — global rigging.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Headings follow the skin: serif under sail, sans in the studio. */
+h1, h2, h3, .yb-serif, ion-title {
+  font-family: var(--yb-heading-family, var(--yb-serif));
+}
+
+ion-title {
+  letter-spacing: 0.02em;
+}
+
+/* The pirate skin lays a faint lantern-and-sea wash over every page; the
+   studio skin sets --yb-wash to `none` and gets a flat surface. */
+ion-content.yb-grain {
+  --background: var(--yb-wash, none), var(--ion-background-color);
+}
+
+/* Studio wants pill buttons and flatter surfaces. */
+.yb-skin-studio {
+  ion-button {
+    --border-radius: var(--yb-radius-button);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  ion-title {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ── Type helpers ────────────────────────────────────────────────────────── */
+.yb-muted {
+  color: var(--yb-muted);
+}
+
+.yb-small {
+  font-size: 0.76rem;
+}
+
+.yb-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.yb-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yb-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Section headers. Pirate draws them as a spaced chart legend with a rule;
+   studio makes them plain bold headings. Both come from skin tokens. */
+.yb-legend {
+  font-family: var(--yb-legend-family);
+  font-size: var(--yb-legend-size);
+  font-weight: var(--yb-legend-weight);
+  letter-spacing: var(--yb-legend-spacing);
+  text-transform: var(--yb-legend-transform);
+  color: var(--yb-legend-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 16px 8px;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: var(--yb-legend-rule);
+    background: var(--yb-hairline);
+  }
+}
+
+/* ── Divider: rope under sail, hairline in the studio ────────────────────── */
+.yb-rope {
+  height: 6px;
+  margin: 4px 16px;
+  border-radius: 3px;
+  background-image: repeating-linear-gradient(
+    115deg,
+    var(--yb-rope) 0 5px,
+    transparent 5px 10px
+  );
+  opacity: 0.8;
+}
+
+.yb-skin-studio .yb-rope {
+  height: 1px;
+  margin: 14px 16px;
+  background-image: none;
+  background-color: var(--yb-hairline);
+}
+
+/* ── Cards / panels ──────────────────────────────────────────────────────── */
+.yb-panel {
+  background: var(--ion-card-background);
+  border: 1px solid var(--yb-hairline);
+  border-radius: var(--yb-radius-card);
+  padding: 14px 16px;
+  margin: 12px 16px;
+}
+
+/* ── Empty states ────────────────────────────────────────────────────────── */
+.yb-empty {
+  text-align: center;
+  padding: 48px 28px;
+  color: var(--yb-muted);
+
+  .yb-empty-glyph {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 12px;
+    opacity: 0.85;
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    margin: 0 0 6px;
+    color: var(--ion-text-color);
+  }
+
+  p {
+    margin: 0 auto;
+    max-width: 34ch;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+}
+
+/* ── Progress bar in the shelf / chapter rows ────────────────────────────── */
+.yb-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--yb-hairline);
+  overflow: hidden;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: var(--ion-color-primary);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+}
+
+/* ── Buttons in the transport ────────────────────────────────────────────── */
+.yb-round {
+  --border-radius: 50%;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* Keep the mini-player clear of the tab bar and the home indicator. */
+ion-content.has-mini {
+  --padding-bottom: 78px;
+}
+
+/* Ionic's modal sheets get the parchment treatment too. */
+ion-modal.yb-sheet {
+  --border-radius: 20px 20px 0 0;
+  --background: var(--ion-background-color);
+}
+
+/* Toasts read like a bosun's shout. */
+ion-toast.yb-toast {
+  --border-radius: 12px;
+  font-family: var(--yb-serif);
+}

@@ -1,0 +1,39 @@
+{
+  "name": "yarnbeard",
+  "version": "1.0.0",
+  "description": "Yarnbeard — a pirate-themed audiobook player for Google Drive.",
+  "private": true,
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "serve": "ionic serve",
+    "serve:pwa": "ng build && node tools/serve-dist.mjs",
+    "serve:dist": "node tools/serve-dist.mjs",
+    "build:ghpages": "ng build --base-href /gdrive-audio-book-player/ && node tools/gh-pages-prep.mjs"
+  },
+  "dependencies": {
+    "@angular/animations": "^18.2.0",
+    "@angular/common": "^18.2.0",
+    "@angular/compiler": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/forms": "^18.2.0",
+    "@angular/platform-browser": "^18.2.0",
+    "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/router": "^18.2.0",
+    "@angular/service-worker": "^18.2.0",
+    "@capacitor/core": "^6.1.0",
+    "@ionic/angular": "^8.2.0",
+    "ionicons": "^7.4.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.0",
+    "@angular/cli": "^18.2.0",
+    "@angular/compiler-cli": "^18.2.0",
+    "@capacitor/cli": "^6.1.0",
+    "typescript": "~5.4.5"
+  }
+}

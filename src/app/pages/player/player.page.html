@@ -1,0 +1,346 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" aria-label="Back">
+        <ion-icon slot="icon-only" name="chevron-down" />
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="helm-title">{{ t().playerTitle }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openBookPage()" aria-label="Book details">
+        <ion-icon slot="icon-only" name="ellipsis-horizontal" />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="yb-grain">
+  @if (player.book(); as book) {
+    <div class="helm">
+      <!-- ── cover ──────────────────────────────────────────────────────── -->
+      <div class="art">
+        <app-cover [bookId]="book.id" [title]="book.title" [size]="248" />
+        @if (player.loading()) {
+          <div class="art-veil">
+            @if (downloadPct(); as pct) {
+              <!-- A conic ring rather than a spinner: on a big .m4b this is a
+                   real wait, and a number is worth more than motion. -->
+              <div class="ring" [style.--p]="pct">
+                <div class="ring-hole">
+                  <span class="ring-pct yb-tabular">{{ pct }}%</span>
+                </div>
+              </div>
+              <div class="dl-bytes yb-small yb-tabular">{{ downloadLabel() }}</div>
+            } @else {
+              <ion-spinner name="crescent" />
+              @if (downloadLabel(); as label) {
+                <div class="dl-bytes yb-small yb-tabular">{{ label }}</div>
+              }
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── titles ─────────────────────────────────────────────────────── -->
+      <div class="titles">
+        <div class="chapter-title yb-clamp-2">
+          {{ player.chapter()?.title || book.title }}
+        </div>
+        <div class="book-title yb-truncate" (click)="openBookPage()">
+          {{ book.title }}
+        </div>
+        <div class="yb-small yb-muted">
+          Chapter {{ player.chapterIndex() + 1 }} of {{ book.chapters.length }}
+          @if (bookRemaining() > 0) {
+            · {{ human(bookRemaining()) }} left in the book
+          }
+        </div>
+      </div>
+
+      @if (player.error(); as err) {
+        <div class="error yb-small">{{ err }}</div>
+      }
+
+      <!-- ── scrubber ───────────────────────────────────────────────────── -->
+      <div class="scrub">
+        <ion-range
+          [min]="0"
+          [max]="player.duration() || 1"
+          [value]="displayPosition()"
+          [disabled]="!player.duration()"
+          (ionKnobMoveStart)="onKnobStart()"
+          (ionInput)="onScrubInput($any($event.detail.value))"
+          (ionKnobMoveEnd)="onKnobEnd($any($event.detail.value))"
+        />
+        <div class="times yb-small yb-tabular yb-muted">
+          <span>{{ clock(displayPosition()) }}</span>
+          <span class="speed-note">
+            −{{ clock(remainingAtSpeed()) }} at {{ player.rate() }}×
+          </span>
+          <span>{{ clock(player.duration()) }}</span>
+        </div>
+      </div>
+
+      <!-- ── transport ──────────────────────────────────────────────────── -->
+      <div class="transport">
+        <button
+          class="t ghost"
+          (click)="player.prev()"
+          [disabled]="!player.hasPrev() && player.position() < 3"
+          aria-label="Previous chapter"
+        >
+          <ion-icon name="play-skip-back" />
+        </button>
+
+        <button class="t skip" (click)="player.back()" aria-label="Skip back">
+          <ion-icon name="play-back" />
+          <span>{{ settings.skipBack() }}</span>
+        </button>
+
+        <button class="t main" (click)="player.togglePlay()" [attr.aria-label]="player.isPlaying() ? 'Pause' : 'Play'">
+          @if (player.loading()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            <ion-icon [name]="player.isPlaying() ? 'pause' : 'play'" />
+          }
+        </button>
+
+        <button class="t skip" (click)="player.forward()" aria-label="Skip forward">
+          <ion-icon name="play-forward" />
+          <span>{{ settings.skipForward() }}</span>
+        </button>
+
+        <button
+          class="t ghost"
+          (click)="player.next()"
+          [disabled]="!player.hasNext()"
+          aria-label="Next chapter"
+        >
+          <ion-icon name="play-skip-forward" />
+        </button>
+      </div>
+
+      <!-- ── tools ──────────────────────────────────────────────────────── -->
+      <div class="tools">
+        <button class="tool" (click)="sheet.set('speed')">
+          <ion-icon name="speedometer-outline" />
+          <span>{{ player.rate() }}×</span>
+        </button>
+
+        <button class="tool" [class.on]="player.sleepActive()" (click)="sheet.set('sleep')">
+          <ion-icon name="moon-outline" />
+          <span>{{ sleepLabel() }}</span>
+        </button>
+
+        <button class="tool" (click)="dropMark()">
+          <ion-icon name="bookmark-outline" />
+          <span>{{ t().markButton }}</span>
+        </button>
+
+        <button class="tool" (click)="writeNote()">
+          <ion-icon name="create" />
+          <span>{{ t().noteButton }}</span>
+        </button>
+
+        <button class="tool" (click)="sheet.set('chapters')">
+          <ion-icon name="list" />
+          <span>{{ t().chaptersButton }}</span>
+        </button>
+      </div>
+
+      <!-- ── marks in this book ─────────────────────────────────────────── -->
+      @if (marksHere().length) {
+        <div class="yb-legend">{{ t().marksPanel }}</div>
+        <div class="marks">
+          @for (mark of marksHere(); track mark.id) {
+            <button class="mark" (click)="player.playChapter(mark.chapterIndex, mark.position)">
+              <span class="yb-tabular">{{ clock(mark.position) }}</span>
+              <span class="yb-truncate">{{ mark.label }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="yb-empty">
+      <div class="yb-empty-glyph">{{ t().playerEmptyGlyph }}</div>
+      <h2>{{ t().playerEmptyTitle }}</h2>
+      <p>{{ t().playerEmptyBody }}</p>
+      <ion-button class="ion-margin-top" (click)="close()">{{ t().toLibrary }}</ion-button>
+    </div>
+  }
+</ion-content>
+
+<!-- ── speed sheet ──────────────────────────────────────────────────────── -->
+<ion-modal
+  class="yb-sheet"
+  [isOpen]="sheet() === 'speed'"
+  [initialBreakpoint]="0.6"
+  [breakpoints]="[0, 0.6]"
+  (didDismiss)="sheet.set('none')"
+>
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ t().speedTitle }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="sheet.set('none')">Done</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div class="speed-grid">
+        @for (s of speeds; track s) {
+          <button class="chip" [class.on]="player.rate() === s" (click)="setSpeed(s)">
+            {{ s }}×
+          </button>
+        }
+      </div>
+
+      <div class="fine">
+        <ion-button fill="outline" size="small" (click)="player.nudgeRate(-0.05)">−0.05</ion-button>
+        <span class="yb-tabular current">{{ player.rate() }}×</span>
+        <ion-button fill="outline" size="small" (click)="player.nudgeRate(0.05)">+0.05</ion-button>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div>{{ t().speedPerBook }}</div>
+          <div class="yb-small yb-muted">{{ t().speedPerBookBlurb }}</div>
+        </div>
+        <ion-toggle
+          [checked]="settings.perBookRate()"
+          (ionChange)="settings.perBookRate.set($any($event.detail.checked))"
+        />
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div>Trim the silences</div>
+          <div class="yb-small yb-muted">
+            Skips the dead air between sentences. Shaves real minutes off a long book.
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="settings.skipSilence()"
+          (ionChange)="settings.skipSilence.set($any($event.detail.checked))"
+        />
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div>Volume boost</div>
+          <div class="yb-small yb-muted">For quiet recordings. {{ settings.boost() }}×</div>
+        </div>
+        <div class="boost-btns">
+          <ion-button fill="clear" size="small" (click)="settings.boost.set(1)" [strong]="settings.boost() === 1">1×</ion-button>
+          <ion-button fill="clear" size="small" (click)="settings.boost.set(1.5)" [strong]="settings.boost() === 1.5">1.5×</ion-button>
+          <ion-button fill="clear" size="small" (click)="settings.boost.set(2)" [strong]="settings.boost() === 2">2×</ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ── sleep sheet ──────────────────────────────────────────────────────── -->
+<ion-modal
+  class="yb-sheet"
+  [isOpen]="sheet() === 'sleep'"
+  [initialBreakpoint]="0.58"
+  [breakpoints]="[0, 0.58]"
+  (didDismiss)="sheet.set('none')"
+>
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ t().sleepTitle }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="sheet.set('none')">Done</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <p class="yb-small yb-muted">{{ t().sleepIntro }}</p>
+
+      <div class="speed-grid">
+        @for (m of sleepChoices; track m) {
+          <button
+            class="chip"
+            [class.usual]="m === settings.sleepMinutes()"
+            (click)="startSleep(m)"
+          >
+            {{ m }}m
+          </button>
+        }
+      </div>
+
+      <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="sleepAtChapterEnd()">
+        {{ t().sleepChapterEnd }}
+      </ion-button>
+
+      @if (player.sleepActive()) {
+        <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="player.extendSleep(10)">
+          {{ t().sleepExtend }}
+        </ion-button>
+        <ion-button expand="block" color="danger" fill="clear" (click)="cancelSleep()">
+          {{ t().sleepCancel }}
+        </ion-button>
+      }
+
+      <div class="toggle-row">
+        <div>
+          <div>{{ t().fadeLabel }}</div>
+          <div class="yb-small yb-muted">{{ t().fadeBlurb }}</div>
+        </div>
+        <ion-toggle
+          [checked]="settings.sleepFade()"
+          (ionChange)="settings.sleepFade.set($any($event.detail.checked))"
+        />
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ── chapters sheet ───────────────────────────────────────────────────── -->
+<ion-modal
+  class="yb-sheet"
+  [isOpen]="sheet() === 'chapters'"
+  [initialBreakpoint]="0.85"
+  [breakpoints]="[0, 0.85]"
+  (didDismiss)="sheet.set('none')"
+>
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ t().chaptersPanel }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="sheet.set('none')">Done</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (player.book(); as book) {
+        <div class="sheet-list">
+          @for (chapter of book.chapters; track chapter.id) {
+            <button
+              class="sheet-row"
+              [class.on]="chapter.index === player.chapterIndex()"
+              (click)="jumpToChapter(chapter)"
+            >
+              <span class="n yb-tabular">{{ chapter.index + 1 }}</span>
+              <span class="t yb-truncate">{{ chapter.title }}</span>
+              @if (chapterDuration(chapter) > 0) {
+                <span class="d yb-small yb-muted yb-tabular">
+                  {{ clock(chapterDuration(chapter)) }}
+                </span>
+              }
+              @if (chapterDone(chapter)) {
+                <span class="done">✔</span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

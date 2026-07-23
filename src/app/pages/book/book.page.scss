@@ -1,0 +1,220 @@
+/* ── the plate ───────────────────────────────────────────────────────────── */
+.plate {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.plate-text {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.plate-text h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.author {
+  margin-top: 4px;
+  font-family: var(--yb-serif);
+  font-style: italic;
+  color: var(--yb-muted);
+}
+
+.facts {
+  margin-top: 8px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--yb-rope);
+  color: var(--yb-muted);
+}
+
+/* ── progress ────────────────────────────────────────────────────────────── */
+.progress-block {
+  padding: 0 16px;
+}
+
+.progress-line {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+/* ── calls to action ─────────────────────────────────────────────────────── */
+.cta {
+  padding: 14px 16px 4px;
+}
+
+.cta-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+
+  ion-button {
+    flex: 1;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 0.76rem;
+  }
+
+  ion-spinner {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ── panels ──────────────────────────────────────────────────────────────── */
+.panels {
+  --background: transparent;
+  padding: 8px 12px 0;
+
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color-checked: var(--ion-color-primary-contrast);
+    font-size: 0.74rem;
+    min-height: 32px;
+  }
+}
+
+.list {
+  padding: 6px 8px 8px;
+}
+
+/* ── chapter rows ────────────────────────────────────────────────────────── */
+.chapter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 8px;
+  border-bottom: 1px solid var(--yb-hairline);
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.playing .chapter-title {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+}
+
+.num {
+  flex: 0 0 auto;
+  width: 28px;
+  text-align: center;
+  font-family: var(--yb-serif);
+  font-size: 0.86rem;
+  color: var(--yb-muted);
+  font-variant-numeric: tabular-nums;
+
+  .done {
+    color: var(--ion-color-success);
+    font-size: 1.1rem;
+  }
+
+  .live {
+    color: var(--ion-color-primary);
+    font-size: 1rem;
+  }
+}
+
+.chapter-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.chapter-title {
+  font-size: 0.92rem;
+}
+
+.chapter-sub {
+  margin-top: 2px;
+  display: flex;
+  gap: 5px;
+}
+
+.chapter-bar {
+  margin-top: 6px;
+  max-width: 220px;
+}
+
+.go {
+  flex: 0 0 auto;
+  color: var(--yb-muted);
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+/* ── marks & log entries ─────────────────────────────────────────────────── */
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px 10px 8px;
+  border-bottom: 1px solid var(--yb-hairline);
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  ion-button {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    margin: 0;
+  }
+}
+
+.entry.note {
+  align-items: flex-start;
+}
+
+.stamp {
+  flex: 0 0 auto;
+  min-width: 52px;
+  padding: 3px 7px;
+  text-align: center;
+  font-size: 0.72rem;
+  border-radius: 8px;
+  background: var(--yb-panel);
+  border: 1px solid var(--yb-rope);
+  color: var(--ion-color-primary);
+}
+
+.entry-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-text {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.export {
+  padding: 16px;
+  text-align: center;
+
+  p {
+    margin: 8px auto 0;
+    max-width: 34ch;
+  }
+}

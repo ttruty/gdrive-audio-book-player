@@ -1,0 +1,237 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>
+      @if (t().appMark) { <span class="mark">{{ t().appMark }}</span> } Yarnbeard
+    </ion-title>
+
+    <ion-buttons slot="end">
+      @if (auth.isSignedIn()) {
+        <ion-button (click)="pickSort()" aria-label="Sort">
+          <ion-icon slot="icon-only" name="swap-vertical" />
+        </ion-button>
+      } @else {
+        <ion-button (click)="signIn()">
+          <ion-icon slot="start" name="log-in-outline" />
+          {{ t().signIn }}
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+
+  @if (hasLibrary()) {
+    <ion-toolbar>
+      <ion-searchbar
+        [placeholder]="t().searchPlaceholder"
+        [value]="query()"
+        (ionInput)="query.set($any($event.target).value ?? '')"
+        animated="true"
+      />
+    </ion-toolbar>
+
+    <ion-toolbar>
+      <ion-segment
+        [value]="filter()"
+        (ionChange)="filter.set($any($event.detail.value))"
+        scrollable="true"
+      >
+        <ion-segment-button value="all">{{ t().filterAll }}</ion-segment-button>
+        <ion-segment-button value="reading">{{ t().filterReading }}</ion-segment-button>
+        <ion-segment-button value="unstarted">{{ t().filterUnstarted }}</ion-segment-button>
+        <ion-segment-button value="finished">{{ t().filterFinished }}</ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  }
+</ion-header>
+
+<ion-content class="yb-grain has-mini">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($any($event))">
+    <ion-refresher-content [pullingText]="t().pullText" [refreshingText]="t().pullBusy" />
+  </ion-refresher>
+
+  <!-- ── not signed in ──────────────────────────────────────────────────── -->
+  @if (!auth.isSignedIn() && !hasLibrary()) {
+    <div class="yb-empty">
+      <div class="yb-empty-glyph">{{ t().welcomeGlyph }}</div>
+      <h2>{{ t().welcomeTitle }}</h2>
+      <p>{{ t().welcomeBody }}</p>
+      <ion-button class="ion-margin-top" (click)="signIn()">
+        <ion-icon slot="start" name="log-in-outline" />
+        {{ t().signIn }} with Google
+      </ion-button>
+    </div>
+  }
+
+  <!-- ── signed in, empty hold ──────────────────────────────────────────── -->
+  @if (auth.isSignedIn() && !hasLibrary()) {
+    <div class="yb-empty">
+      <div class="yb-empty-glyph">{{ t().emptyGlyph }}</div>
+      <h2>{{ t().emptyTitle }}</h2>
+      <p>{{ t().emptyBody }}</p>
+      <ion-button class="ion-margin-top" (click)="openAdd()">
+        <ion-icon slot="start" name="add" />
+        {{ t().addBook }}
+      </ion-button>
+    </div>
+  }
+
+  <!-- ── continue listening ─────────────────────────────────────────────── -->
+  @if (continueBook(); as book) {
+    <div class="yb-legend">{{ t().continueLegend }}</div>
+    <div class="continue" (click)="resume(book)">
+      <app-cover
+        [bookId]="book.id"
+        [title]="book.title"
+        [size]="82"
+        [progress]="percent(book)"
+      />
+      <div class="continue-text">
+        <div class="continue-title yb-clamp-2">{{ book.title }}</div>
+        @if (book.author) {
+          <div class="yb-small yb-muted yb-truncate">{{ book.author }}</div>
+        }
+        <div class="yb-small yb-muted continue-status">{{ status(book) }}</div>
+        <div class="yb-bar continue-bar">
+          <span [style.width.%]="percent(book) * 100"></span>
+        </div>
+      </div>
+      <ion-button fill="clear" size="large" (click)="resume(book, $event)" aria-label="Resume">
+        <ion-icon slot="icon-only" name="play-circle" />
+      </ion-button>
+    </div>
+  }
+
+  <!-- ── the shelf ──────────────────────────────────────────────────────── -->
+  @if (hasLibrary()) {
+    <div class="yb-legend">
+      {{ books().length }} {{ books().length === 1 ? 'book' : 'books' }}
+    </div>
+
+    @if (!books().length) {
+      <div class="yb-empty">
+        <div class="yb-empty-glyph">🔍</div>
+        <h2>{{ t().noMatchTitle }}</h2>
+        <p>{{ t().noMatchBody }}</p>
+      </div>
+    }
+
+    <div class="shelf">
+      @for (book of books(); track book.id) {
+        <div class="row" (click)="openBook(book)">
+          <app-cover
+            [bookId]="book.id"
+            [title]="book.title"
+            [size]="62"
+            [progress]="percent(book)"
+            [finished]="finished(book)"
+          />
+
+          <div class="row-text">
+            <div class="row-title yb-clamp-2">{{ book.title }}</div>
+            @if (book.author) {
+              <div class="yb-small yb-muted yb-truncate">{{ book.author }}</div>
+            }
+            <div class="yb-small yb-muted yb-truncate">{{ status(book) }}</div>
+          </div>
+
+          <ion-button
+            fill="clear"
+            class="row-more"
+            (click)="bookActions(book, $event)"
+            aria-label="More"
+          >
+            <ion-icon slot="icon-only" name="ellipsis-horizontal" />
+          </ion-button>
+        </div>
+      }
+    </div>
+
+    <div class="add-more">
+      <ion-button fill="outline" (click)="openAdd()">
+        <ion-icon slot="start" name="add" />
+        {{ t().addAnother }}
+      </ion-button>
+    </div>
+  }
+</ion-content>
+
+<!-- ── add sheet ────────────────────────────────────────────────────────── -->
+<ion-modal
+  class="yb-sheet"
+  [isOpen]="addOpen()"
+  [initialBreakpoint]="0.62"
+  [breakpoints]="[0, 0.62, 0.92]"
+  (didDismiss)="addOpen.set(false)"
+>
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ t().addSheetTitle }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="addOpen.set(false)">Close</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <p class="yb-small yb-muted intro">{{ t().addIntro }}</p>
+
+      <ion-input
+        label="Drive folder link or id"
+        labelPlacement="stacked"
+        fill="outline"
+        placeholder="https://drive.google.com/drive/folders/…"
+        [value]="folderLink()"
+        (ionInput)="folderLink.set($any($event.target).value ?? '')"
+        [disabled]="scanning()"
+      />
+
+      <div class="yb-legend">How to read it</div>
+      <div class="mode-choice">
+        <button
+          class="mode"
+          [class.on]="addMode() === 'files'"
+          (click)="addMode.set('files')"
+          [disabled]="scanning()"
+        >
+          <span class="mode-title">{{ t().modeFilesTitle }}</span>
+          <span class="yb-small">{{ t().modeFilesBlurb }}</span>
+        </button>
+
+        <button
+          class="mode"
+          [class.on]="addMode() === 'folder'"
+          (click)="addMode.set('folder')"
+          [disabled]="scanning()"
+        >
+          <span class="mode-title">{{ t().modeFolderTitle }}</span>
+          <span class="yb-small">{{ t().modeFolderBlurb }}</span>
+        </button>
+      </div>
+
+      @if (scanning()) {
+        <div class="scanning">
+          <ion-spinner name="crescent" />
+          <span class="yb-small">{{ scanNote() || t().scanStart }}</span>
+        </div>
+      }
+
+      <ion-button expand="block" class="ion-margin-top" (click)="addFromLink()" [disabled]="scanning()">
+        <ion-icon slot="start" name="add" />
+        {{ t().addSubmit }}
+      </ion-button>
+
+      @if (library.shelves().length) {
+        <div class="yb-legend">{{ t().foldersLegend }}</div>
+        @for (shelf of library.shelves(); track shelf.id) {
+          <div class="shelf-row">
+            <span class="yb-truncate">📚 {{ shelf.name }}</span>
+            <ion-button fill="clear" size="small" (click)="library.removeShelf(shelf.id)">
+              {{ t().forget }}
+            </ion-button>
+          </div>
+        }
+        <p class="yb-small yb-muted">{{ t().refreshHint }}</p>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
