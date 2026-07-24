@@ -27,6 +27,7 @@ import {
   cloudDoneOutline,
   cloudOfflineOutline,
   ellipsisHorizontal,
+  folderOpenOutline,
   logInOutline,
   playCircle,
   refreshOutline,
@@ -34,6 +35,7 @@ import {
 } from 'ionicons/icons';
 
 import { BookCoverComponent } from '../../components/book-cover.component';
+import { DrivePickerComponent } from '../../components/drive-picker.component';
 import { InstallBannerComponent } from '../../components/install-banner.component';
 import { LandingComponent } from '../../components/landing.component';
 import { LocalAddComponent } from '../../components/local-add.component';
@@ -69,6 +71,7 @@ import { humanDuration, relativeTime } from '../../util/format';
     IonInput,
     IonSpinner,
     BookCoverComponent,
+    DrivePickerComponent,
     InstallBannerComponent,
     LandingComponent,
     LocalAddComponent,
@@ -102,6 +105,9 @@ export class ShelfPage {
    */
   readonly addMode = signal<'files' | 'folder'>('files');
 
+  /** The Drive folder browser modal. */
+  readonly pickerOpen = signal(false);
+
   readonly books = computed(() =>
     this.library.view({
       filter: this.filter(),
@@ -121,6 +127,7 @@ export class ShelfPage {
       refreshOutline,
       swapVertical,
       ellipsisHorizontal,
+      folderOpenOutline,
       logInOutline,
       cloudDoneOutline,
       cloudOfflineOutline,
@@ -178,6 +185,30 @@ export class ShelfPage {
     this.folderLink.set('');
     this.scanNote.set('');
     this.addOpen.set(true);
+  }
+
+  /** Open the Drive folder browser, signing in first if needed. */
+  async openPicker(): Promise<void> {
+    if (!this.auth.isSignedIn()) {
+      await this.signIn();
+      if (!this.auth.isSignedIn()) return;
+    } else if (!this.auth.hasLiveToken()) {
+      // Signed in optimistically but the token has lapsed — refresh now, while
+      // this tap still counts as the user gesture a popup would need.
+      try {
+        await this.auth.getValidToken();
+      } catch {
+        /* the picker shows a Retry if the first listing fails */
+      }
+    }
+    this.pickerOpen.set(true);
+  }
+
+  /** A folder was chosen in the browser — scan it with the current mode. */
+  async onFolderPicked(folderId: string): Promise<void> {
+    this.pickerOpen.set(false);
+    this.folderLink.set(folderId);
+    await this.addFromLink();
   }
 
   /** A batch of device files was imported (from the sheet or the landing). */

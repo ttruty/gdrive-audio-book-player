@@ -178,7 +178,13 @@
 
       <div class="or-line"><span>{{ t().orDivider }}</span></div>
 
-      <p class="yb-small yb-muted intro">{{ t().addIntro }}</p>
+      <!-- Browse Drive visually — no share URL to hunt for. -->
+      <ion-button expand="block" fill="outline" (click)="openPicker()" [disabled]="scanning()">
+        <ion-icon slot="start" name="folder-open-outline" />
+        {{ t().browseDrive }}
+      </ion-button>
+
+      <p class="yb-small yb-muted intro paste-intro">or paste a folder link:</p>
 
       <ion-input
         label="Drive folder link or id"
@@ -240,3 +246,10 @@
     </ion-content>
   </ng-template>
 </ion-modal>
+
+<!-- ── Drive folder browser ─────────────────────────────────────────────── -->
+<app-drive-picker
+  [isOpen]="pickerOpen()"
+  (picked)="onFolderPicked($event)"
+  (dismiss)="pickerOpen.set(false)"
+/>

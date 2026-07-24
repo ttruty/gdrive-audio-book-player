@@ -144,7 +144,11 @@ file resumes it where you left off. Because they are the only copy, they are
 never evicted from the cache — if you clear the cache, re-add the file.
 
 **From Google Drive.**
-- **Paste one Drive link.** Every audio file inside becomes its own book, and
+- **Browse your Drive in the app.** Since you're already signed in, tap *Browse
+  my Drive* and navigate your folders (and folders shared with you) like a file
+  explorer — breadcrumbs, subfolders, and a live count of the audio inside each
+  folder — then pick the one that holds a book. No share URL to hunt for.
+- **Or paste one Drive link.** Every audio file inside becomes its own book, and
   subfolders are searched too. Paste a link to a single file and you get that
   one book.
 - **Or switch to "every folder is a book"** in the add sheet, for titles split

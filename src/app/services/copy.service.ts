@@ -34,6 +34,7 @@ export interface Vocab {
   addAnother: string;
   addSheetTitle: string;
   addSubmit: string;
+  browseDrive: string;
   addFromDevice: string;
   addFromDeviceBlurb: string;
   orDivider: string;
@@ -219,6 +220,7 @@ const PIRATE: Vocab = {
   addAnother: 'Add another',
   addSheetTitle: 'Haul a book aboard',
   addSubmit: 'Haul it aboard',
+  browseDrive: 'Browse yer Drive',
   addFromDevice: 'Add books from this device',
   addFromDeviceBlurb: 'Pick .m4b or .mp3 files from yer machine. No Google needed — they stay on this device.',
   orDivider: 'or',
@@ -414,6 +416,7 @@ const STUDIO: Vocab = {
   addAnother: 'Add more',
   addSheetTitle: 'Add from Drive',
   addSubmit: 'Add to library',
+  browseDrive: 'Browse my Drive',
   addFromDevice: 'Add books from this device',
   addFromDeviceBlurb: 'Choose .m4b or .mp3 files from your device. No Google account needed — they stay on this device.',
   orDivider: 'or',

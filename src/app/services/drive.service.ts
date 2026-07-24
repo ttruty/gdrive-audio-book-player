@@ -43,6 +43,12 @@ interface DriveFile {
   modifiedTime?: string;
 }
 
+/** A Drive folder, for the in-app folder browser. */
+export interface DriveFolder {
+  id: string;
+  name: string;
+}
+
 
 @Injectable({ providedIn: 'root' })
 export class DriveService {
@@ -152,6 +158,40 @@ export class DriveService {
       pageToken = data.nextPageToken;
     } while (pageToken);
     return out;
+  }
+
+  // ── browsing (the in-app folder explorer) ────────────────────────────────
+  /**
+   * List a folder's subfolders and count the audio inside it, for the folder
+   * picker. One listing answers both "where can I go next" (the subfolders)
+   * and "is there a book here" (the audio count).
+   */
+  async browseChildren(
+    folderId: string
+  ): Promise<{ folders: DriveFolder[]; audioCount: number }> {
+    const children = await this.listChildren(folderId);
+    const folders = children
+      .filter((f) => this.isFolder(f))
+      .map((f) => ({ id: f.id, name: f.name }))
+      .sort((a, b) => naturalCompare(a.name, b.name));
+    const audioCount = children.filter((f) => this.isAudio(f)).length;
+    return { folders, audioCount };
+  }
+
+  /** Top-level folders that other people have shared with you. */
+  async browseSharedWithMe(): Promise<DriveFolder[]> {
+    const params = new URLSearchParams({
+      q: "sharedWithMe = true and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      fields: 'files(id, name)',
+      pageSize: '200',
+      orderBy: 'name_natural',
+      supportsAllDrives: 'true',
+      includeItemsFromAllDrives: 'true',
+    });
+    const data = await this.apiJson(`${DRIVE_FILES}?${params}`);
+    return ((data.files ?? []) as DriveFile[])
+      .map((f) => ({ id: f.id, name: f.name }))
+      .sort((a, b) => naturalCompare(a.name, b.name));
   }
 
   /** Metadata for any Drive item. */
