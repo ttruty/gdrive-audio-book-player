@@ -323,6 +323,12 @@ export class BookPage {
       await this.toast('Nothing to export yet.', 'warning');
       return;
     }
+    // A local book has no Drive folder — save the log to the device directly.
+    if (b.source === 'local') {
+      this.notes.downloadMarkdown(b);
+      await this.toast('Log downloaded to this device.');
+      return;
+    }
     this.busy.set(true);
     try {
       const name = await this.notes.exportToDrive(b);
@@ -369,13 +375,15 @@ export class BookPage {
     const b = this.book();
     if (!b) return;
     const done = this.finished();
+    const local = b.source === 'local';
     const c = this.t();
     const sheet = await this.sheets.create({
       header: b.title,
       buttons: [
         { text: c.renameTitle, handler: () => void this.rename() },
         { text: c.editTags, handler: () => void this.editTags() },
-        { text: c.rescan, handler: () => void this.rescan() },
+        // A local book has no Drive folder to re-scan from.
+        ...(local ? [] : [{ text: c.rescan, handler: () => void this.rescan() }]),
         {
           text: done ? c.markUnread : c.markFinished,
           handler: () => this.progress.markFinished(b.id, !done),

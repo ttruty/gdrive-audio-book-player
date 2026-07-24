@@ -9,6 +9,7 @@ import {
   playCircleOutline,
 } from 'ionicons/icons';
 
+import { LocalAddComponent } from './local-add.component';
 import { environment } from '../../environments/environment';
 
 /**
@@ -23,7 +24,7 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [IonButton, IonIcon],
+  imports: [IonButton, IonIcon, LocalAddComponent],
   template: `
     <div class="landing">
       <header class="hero">
@@ -46,6 +47,19 @@ import { environment } from '../../environments/environment';
       <p class="cta-note">
         Sign in with your Google account to open your Drive. You choose which
         folders to add.
+      </p>
+
+      <div class="or-line"><span>or</span></div>
+
+      <app-local-add
+        class="local"
+        [expand]="true"
+        (added)="localAdded.emit($event)"
+        (failed)="localFailed.emit($event)"
+      />
+      <p class="cta-note">
+        No account needed — add <code>.m4b</code> or <code>.mp3</code> files
+        straight from this device. They stay on your device.
       </p>
 
       <h2 class="section">What you can do</h2>
@@ -112,6 +126,8 @@ import { environment } from '../../environments/environment';
 })
 export class LandingComponent {
   readonly signIn = output<void>();
+  readonly localAdded = output<number>();
+  readonly localFailed = output<string>();
 
   // Relative, so they resolve under whatever base href the build used
   // (e.g. a GitHub Pages project subpath).

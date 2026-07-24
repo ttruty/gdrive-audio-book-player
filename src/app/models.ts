@@ -51,6 +51,12 @@ export interface Book {
   id: string;
   /** Which shape this book is. Older records without it are folder books. */
   kind?: 'file' | 'folder';
+  /**
+   * Where the audio comes from. `drive` (the default) fetches from Google
+   * Drive; `local` was imported from the device and lives only in this
+   * browser's cache — it needs no sign-in and never syncs to Drive.
+   */
+  source?: 'drive' | 'local';
   /** Editable title; defaults to an embedded tag, else the file/folder name. */
   title: string;
   /** Name as it exists in Drive (kept for re-sync and display hints). */

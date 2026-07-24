@@ -53,7 +53,11 @@
 
   <!-- ── not signed in: the public home page ────────────────────────────── -->
   @if (!auth.isSignedIn() && !hasLibrary()) {
-    <app-landing (signIn)="signIn()" />
+    <app-landing
+      (signIn)="signIn()"
+      (localAdded)="onLocalAdded($event)"
+      (localFailed)="onLocalFailed($event)"
+    />
   }
 
   <!-- ── signed in, empty hold ──────────────────────────────────────────── -->
@@ -168,6 +172,12 @@
     </ion-header>
 
     <ion-content class="ion-padding">
+      <!-- From the device first: it needs no Google account at all. -->
+      <p class="yb-small yb-muted intro">{{ t().addFromDeviceBlurb }}</p>
+      <app-local-add [expand]="true" (added)="onLocalAdded($event)" (failed)="onLocalFailed($event)" />
+
+      <div class="or-line"><span>{{ t().orDivider }}</span></div>
+
       <p class="yb-small yb-muted intro">{{ t().addIntro }}</p>
 
       <ion-input

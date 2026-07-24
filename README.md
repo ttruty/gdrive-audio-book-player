@@ -128,7 +128,22 @@ For MP4-family files Yarnbeard opens the container and reads what's inside it:
 - A file with no markers is simply a one-chapter book. A file that won't parse
   still plays.
 
-### Your library
+### Two ways to add books
+
+**From this device — no Google account needed.** Pick `.m4b`/`.mp3` files from
+your machine and they become books straight away. The bytes are stored in the
+browser (pinned in Cache Storage, never evicted), embedded `.m4b` chapters,
+title, author and cover are read out just as they are for Drive files, and the
+book plays entirely offline. Nothing is uploaded and no sign-in is required —
+the option sits right on the welcome screen and in the add sheet. This is the
+whole app, usable without ever touching Google.
+
+Local books stay on the device that added them: they're excluded from Drive
+sync (their bytes can't ride along in the sync file), and re-picking the same
+file resumes it where you left off. Because they are the only copy, they are
+never evicted from the cache — if you clear the cache, re-add the file.
+
+**From Google Drive.**
 - **Paste one Drive link.** Every audio file inside becomes its own book, and
   subfolders are searched too. Paste a link to a single file and you get that
   one book.

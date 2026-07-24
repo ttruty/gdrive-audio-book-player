@@ -50,6 +50,32 @@
   line-height: 1.5;
 }
 
+.or-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 22rem;
+  margin: 20px auto 16px;
+  color: var(--yb-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--yb-hairline);
+  }
+}
+
+.local {
+  display: block;
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
 .section {
   margin: 34px 0 12px;
   font-size: 1.1rem;

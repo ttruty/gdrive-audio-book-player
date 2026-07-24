@@ -34,6 +34,9 @@ export interface Vocab {
   addAnother: string;
   addSheetTitle: string;
   addSubmit: string;
+  addFromDevice: string;
+  addFromDeviceBlurb: string;
+  orDivider: string;
   addIntro: string;
   modeFilesTitle: string;
   modeFilesBlurb: string;
@@ -216,6 +219,9 @@ const PIRATE: Vocab = {
   addAnother: 'Add another',
   addSheetTitle: 'Haul a book aboard',
   addSubmit: 'Haul it aboard',
+  addFromDevice: 'Add books from this device',
+  addFromDeviceBlurb: 'Pick .m4b or .mp3 files from yer machine. No Google needed — they stay on this device.',
+  orDivider: 'or',
   addIntro:
     'Open the folder in Google Drive, copy the address, and paste it below. Subfolders are searched too.',
   modeFilesTitle: 'Every file is a book',
@@ -408,6 +414,9 @@ const STUDIO: Vocab = {
   addAnother: 'Add more',
   addSheetTitle: 'Add from Drive',
   addSubmit: 'Add to library',
+  addFromDevice: 'Add books from this device',
+  addFromDeviceBlurb: 'Choose .m4b or .mp3 files from your device. No Google account needed — they stay on this device.',
+  orDivider: 'or',
   addIntro:
     'Open the folder in Google Drive, copy its address, and paste it below. Subfolders are included.',
   modeFilesTitle: 'Each file is a book',

@@ -36,6 +36,7 @@ import {
 import { BookCoverComponent } from '../../components/book-cover.component';
 import { InstallBannerComponent } from '../../components/install-banner.component';
 import { LandingComponent } from '../../components/landing.component';
+import { LocalAddComponent } from '../../components/local-add.component';
 import { CopyService } from '../../services/copy.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
 import { LibraryService } from '../../services/library.service';
@@ -70,6 +71,7 @@ import { humanDuration, relativeTime } from '../../util/format';
     BookCoverComponent,
     InstallBannerComponent,
     LandingComponent,
+    LocalAddComponent,
   ],
 })
 export class ShelfPage {
@@ -178,6 +180,17 @@ export class ShelfPage {
     this.addOpen.set(true);
   }
 
+  /** A batch of device files was imported (from the sheet or the landing). */
+  async onLocalAdded(count: number): Promise<void> {
+    if (!count) return;
+    this.addOpen.set(false);
+    await this.toast(count === 1 ? 'Book added from this device.' : `${count} books added.`);
+  }
+
+  async onLocalFailed(message: string): Promise<void> {
+    await this.toast(message, 'danger');
+  }
+
   /**
    * Read whatever was pasted. Each audio file in the folder becomes its own
    * book by default — .m4b files carry their own chapters, so one file really
@@ -275,7 +288,10 @@ export class ShelfPage {
             this.progress.markFinished(book.id, !done);
           },
         },
-        { text: c.rescan, handler: () => void this.rescan(book) },
+        // A local book has no Drive folder to re-scan.
+        ...(book.source === 'local'
+          ? []
+          : [{ text: c.rescan, handler: () => void this.rescan(book) }]),
         { text: c.renameTitle, handler: () => void this.rename(book) },
         {
           text: c.removeAction,

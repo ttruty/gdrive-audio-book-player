@@ -3,6 +3,7 @@ import { GoogleAuthService } from './google-auth.service';
 import { OfflineService } from './offline.service';
 import { Book, Chapter } from '../models';
 import { chapterTitle, naturalCompare, newId, parseFolderTitle } from '../util/format';
+import { buildFileChapters } from '../util/chapters';
 import { Mp4Meta, readMp4Meta } from '../util/mp4';
 import { ProgressFn, readWithProgress } from '../util/stream';
 
@@ -250,7 +251,7 @@ export class DriveService {
       title: meta?.title || meta?.album || parsed.title || fallbackTitle,
       folderName: file.name,
       author: meta?.author || parsed.author,
-      chapters: this.chaptersForFile(file, size, meta),
+      chapters: buildFileChapters(file.id, file.name, file.mimeType, size || undefined, meta),
       embeddedChapters: (meta?.chapters.length ?? 0) > 0,
       addedAt: Date.now(),
       refreshedAt: Date.now(),
@@ -269,54 +270,6 @@ export class DriveService {
     } catch {
       return null;
     }
-  }
-
-  /** Turn embedded markers into chapter windows over the one file. */
-  private chaptersForFile(
-    file: DriveFile,
-    size: number,
-    meta: Mp4Meta | null
-  ): Chapter[] {
-    const bytes = size || undefined;
-    const marks = meta?.chapters ?? [];
-
-    if (!marks.length) {
-      return [
-        {
-          id: file.id,
-          fileId: file.id,
-          name: file.name,
-          title: chapterTitle(file.name),
-          index: 0,
-          mimeType: file.mimeType,
-          size: bytes,
-          duration: meta?.duration || undefined,
-          start: 0,
-          end: meta?.duration || undefined,
-        },
-      ];
-    }
-
-    // A marker at 0:00 is the norm; if the first one starts later, the audio
-    // before it is still part of the book, so it gets an opening chapter.
-    const points = marks[0].start > 1 ? [{ title: 'Opening', start: 0 }, ...marks] : marks;
-
-    return points.map((mark, i) => {
-      const start = i === 0 ? 0 : mark.start;
-      const end = points[i + 1]?.start ?? meta?.duration ?? undefined;
-      return {
-        id: `${file.id}#${i}`,
-        fileId: file.id,
-        name: file.name,
-        title: mark.title?.trim() || `Chapter ${i + 1}`,
-        index: i,
-        mimeType: file.mimeType,
-        size: bytes,
-        duration: end != null ? Math.max(0, end - start) : undefined,
-        start,
-        end,
-      };
-    });
   }
 
   /**

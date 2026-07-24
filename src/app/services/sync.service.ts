@@ -87,7 +87,10 @@ export class SyncService {
       app: 'yarnbeard',
       version: 1,
       updatedAt: Date.now(),
-      books: this.library.snapshotBooks(),
+      // Local books live only in this browser's cache — their bytes can't
+      // follow the sync file to another device, so syncing them as metadata
+      // would just plant unplayable entries elsewhere. Keep them out.
+      books: this.library.snapshotBooks().filter((b) => b.source !== 'local'),
       shelves: this.library.snapshotShelves(),
       progress: this.progress.snapshot(),
       bookmarks: this.bookmarks.snapshot(),

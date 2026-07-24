@@ -122,6 +122,26 @@ ion-segment-button {
   gap: 8px;
 }
 
+/* "or" divider between the device picker and the Drive link. */
+.or-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 2px;
+  color: var(--yb-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--yb-hairline);
+  }
+}
+
 .mode {
   display: flex;
   flex-direction: column;

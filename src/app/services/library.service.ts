@@ -237,6 +237,8 @@ export class LibraryService {
   async refresh(bookId: string): Promise<Book> {
     const book = this.get(bookId);
     if (!book) throw new Error('That book is not on the shelf.');
+    // A local book has no Drive origin to re-scan; re-add the file instead.
+    if (book.source === 'local') return book;
     return this.upsert(await this.drive.refreshBook(book));
   }
 
