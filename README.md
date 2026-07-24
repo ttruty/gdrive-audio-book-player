@@ -226,6 +226,14 @@ You need your own OAuth client — only you can create this.
 
 ---
 
+## Versioning
+
+The version in `package.json` is the single source of truth. On every build,
+`tools/gen-version.mjs` (the `prebuild` script) stamps it — plus the build date
+and git commit — into `src/app/version.ts`, which is shown in **Settings →
+About** (e.g. `v1.1.0 · Build 2026-07-24 · af9c86b`). Bump `package.json` and
+the rest follows; the visible version is a quick way to confirm a deploy took.
+
 ## Run it
 
 ```bash

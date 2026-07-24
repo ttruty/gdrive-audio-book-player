@@ -1,12 +1,13 @@
 {
   "name": "yarnbeard",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Yarnbeard — a pirate-themed audiobook player for Google Drive.",
   "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "prebuild": "node tools/gen-version.mjs",
     "serve": "ionic serve",
     "serve:pwa": "npm run build && node tools/serve-dist.mjs",
     "serve:dist": "node tools/serve-dist.mjs",

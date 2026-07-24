@@ -130,7 +130,20 @@ ion-toggle {
   .name {
     font-family: var(--yb-serif);
     font-size: 1.1rem;
-    margin: 0 0 8px;
+    margin: 0 0 2px;
+  }
+
+  .ver {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    color: var(--ion-color-primary);
+    margin-left: 4px;
+  }
+
+  .build {
+    margin: 0 0 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
   }
 
   p {

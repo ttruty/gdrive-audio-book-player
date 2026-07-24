@@ -51,6 +51,7 @@ import {
 } from '../../services/settings.service';
 import { SyncService } from '../../services/sync.service';
 import { bytes, relativeTime } from '../../util/format';
+import { BUILD_DATE, GIT_SHA, VERSION } from '../../version';
 
 @Component({
   selector: 'app-charts',
@@ -94,6 +95,10 @@ export class ChartsPage {
   readonly boostChoices = BOOST_OPTIONS;
   readonly sleepChoices = SLEEP_OPTIONS;
   readonly budgetChoices = CACHE_BUDGETS;
+
+  readonly version = VERSION;
+  /** "2026-07-24 · af9c86b" — build date and commit, when known. */
+  readonly buildInfo = [BUILD_DATE, GIT_SHA].filter(Boolean).join(' · ');
 
   readonly storageUsed = signal<string>('');
   readonly persistent = signal<boolean | null>(null);

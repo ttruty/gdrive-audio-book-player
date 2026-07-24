@@ -462,7 +462,12 @@
   <!-- ── about ──────────────────────────────────────────────────────────── -->
   <div class="yb-legend">{{ t().sectionAbout }}</div>
   <div class="yb-panel about">
-    <p class="name">{{ t().appMark }} Yarnbeard</p>
+    <p class="name">
+      {{ t().appMark }} Yarnbeard <span class="ver">v{{ version }}</span>
+    </p>
+    @if (buildInfo) {
+      <p class="yb-small yb-muted build">Build {{ buildInfo }}</p>
+    }
     <p class="yb-small yb-muted">{{ t().aboutBlurb }}</p>
     <p class="yb-small legal">
       <!-- Relative, so they resolve under whatever base href the build used. -->
