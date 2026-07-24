@@ -650,7 +650,7 @@ export class PlayerService {
         this.duration(),
         listened
       );
-      if (listened > 0) this.stats.add(listened);
+      if (listened > 0) this.stats.add(listened, b.id, b.title);
 
       try {
         const data: StoredPlayback = {

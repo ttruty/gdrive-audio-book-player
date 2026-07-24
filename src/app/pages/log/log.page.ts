@@ -24,8 +24,19 @@ import { NotesService } from '../../services/notes.service';
 import { PlayerService } from '../../services/player.service';
 import { ProgressService } from '../../services/progress.service';
 import { StatsService } from '../../services/stats.service';
-import { Bookmark, DayStat, Note } from '../../models';
-import { hhmmss, humanDuration, relativeTime } from '../../util/format';
+import { Bookmark, DayStat, Note, Session } from '../../models';
+import { dayKey, hhmmss, humanDuration, relativeTime } from '../../util/format';
+
+/** Round a duration up to a clean axis maximum (…30m, 1h, 2h, 4h…). */
+function niceCeil(seconds: number): number {
+  const ladder = [
+    60, 120, 300, 600, 900, 1200, 1800, 2700, 3600, 5400, 7200, 10800, 14400,
+    21600, 28800, 43200, 86400,
+  ];
+  for (const step of ladder) if (seconds <= step) return step;
+  // Beyond a day, round up to whole days.
+  return Math.ceil(seconds / 86400) * 86400;
+}
 
 type Panel = 'entries' | 'marks' | 'voyage';
 
@@ -75,6 +86,9 @@ export class LogPage {
 
   readonly panel = signal<Panel>('entries');
   readonly query = signal('');
+
+  /** The day whose detail is expanded under the chart. Defaults to today. */
+  readonly selectedDate = signal<string>(dayKey());
 
   private bookTitle(bookId: string): string {
     return this.library.get(bookId)?.title ?? 'Removed book';
@@ -141,6 +155,34 @@ export class LogPage {
     Math.max(1, ...this.days().map((d) => d.seconds))
   );
 
+  /** A tidy round ceiling at or above the peak, so the axis reads cleanly. */
+  readonly axisMax = computed(() => niceCeil(this.peakDay()));
+
+  /** Y-axis ticks, top to bottom: full, half, zero. */
+  readonly axisTicks = computed(() => {
+    const max = this.axisMax();
+    return [max, max / 2, 0].map((seconds) => ({
+      seconds,
+      label: seconds === 0 ? '0' : humanDuration(seconds),
+    }));
+  });
+
+  /** The day object currently selected in the chart. */
+  readonly selectedDay = computed<DayStat>(() => {
+    const date = this.selectedDate();
+    return (
+      this.days().find((d) => d.date === date) ?? { date, seconds: 0 }
+    );
+  });
+
+  /** What was listened to on the selected day, per book. */
+  readonly selectedBooks = computed(() => this.stats.booksForDay(this.selectedDate()));
+
+  /** The individual sittings on the selected day. */
+  readonly selectedSessions = computed(() =>
+    this.stats.sessionsForDay(this.selectedDate())
+  );
+
   readonly finishedCount = computed(
     () => this.library.books().filter((b) => this.progress.isFinished(b.id)).length
   );
@@ -169,13 +211,55 @@ export class LogPage {
   }
 
   barHeight(day: DayStat): number {
-    return Math.max(3, Math.round((day.seconds / this.peakDay()) * 100));
+    if (day.seconds <= 0) return 0;
+    // Scale to the axis maximum so the bars line up with the Y-axis ticks.
+    return Math.max(2, Math.round((day.seconds / this.axisMax()) * 100));
   }
 
   /** "M" for Monday etc — a single initial keeps the strip narrow. */
   dayInitial(day: DayStat): string {
     const d = new Date(`${day.date}T12:00:00`);
     return d.toLocaleDateString(undefined, { weekday: 'narrow' });
+  }
+
+  isSelected(day: DayStat): boolean {
+    return day.date === this.selectedDate();
+  }
+
+  isToday(day: DayStat): boolean {
+    return day.date === dayKey();
+  }
+
+  selectDay(day: DayStat): void {
+    this.selectedDate.set(day.date);
+  }
+
+  /** "Mon 24 Jul" — the header of the day detail. */
+  dayFull(date: string): string {
+    const d = new Date(`${date}T12:00:00`);
+    if (date === dayKey()) return 'Today';
+    return d.toLocaleDateString(undefined, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+  }
+
+  /** "2:15 – 2:48 PM" for a session's wall-clock span. */
+  sessionRange(s: Session): string {
+    const fmt = (ms: number) =>
+      new Date(ms).toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+    return `${fmt(s.startedAt)} – ${fmt(s.endedAt)}`;
+  }
+
+  /** Jump into a book from its stats row, when it's still on the shelf. */
+  openBookFromStats(bookId: string): void {
+    if (this.library.get(bookId)) {
+      void this.router.navigate(['/tabs/book', bookId]);
+    }
   }
 
   // ── actions ──────────────────────────────────────────────────────────────

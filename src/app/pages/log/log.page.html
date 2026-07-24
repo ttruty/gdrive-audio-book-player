@@ -126,18 +126,83 @@
     </div>
 
     <div class="yb-legend">{{ t().chartLegend }}</div>
-    <div class="chart">
-      @for (day of days(); track day.date) {
-        <div class="col" [attr.title]="day.date + ' — ' + human(day.seconds)">
-          <div class="bar-wrap">
-            <div
-              class="bar"
-              [style.height.%]="barHeight(day)"
-              [class.zero]="day.seconds === 0"
-            ></div>
-          </div>
-          <div class="tick yb-small yb-muted">{{ dayInitial(day) }}</div>
+
+    <div class="chart-wrap">
+      <!-- Y axis: time-scale labels aligned to the top, middle and base. -->
+      <div class="y-axis" aria-hidden="true">
+        @for (tick of axisTicks(); track tick.seconds) {
+          <div class="y-tick"><span>{{ tick.label }}</span></div>
+        }
+      </div>
+
+      <div class="chart">
+        <!-- Gridlines behind the bars, matching the Y ticks. -->
+        <div class="gridlines" aria-hidden="true">
+          @for (tick of axisTicks(); track tick.seconds) {
+            <span></span>
+          }
         </div>
+
+        @for (day of days(); track day.date) {
+          <button
+            type="button"
+            class="col"
+            [class.on]="isSelected(day)"
+            (click)="selectDay(day)"
+            [attr.aria-label]="dayFull(day.date) + ' — ' + human(day.seconds)"
+          >
+            <div class="bar-wrap">
+              <div
+                class="bar"
+                [style.height.%]="barHeight(day)"
+                [class.zero]="day.seconds === 0"
+              ></div>
+            </div>
+            <div class="tick yb-small" [class.today]="isToday(day)">
+              {{ dayInitial(day) }}
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── the selected day's detail ────────────────────────────────────── -->
+    <div class="yb-panel day-detail">
+      <div class="detail-head">
+        <span class="detail-day">{{ dayFull(selectedDate()) }}</span>
+        <span class="detail-total yb-tabular">{{ human(selectedDay().seconds) }}</span>
+      </div>
+
+      @if (selectedDay().seconds <= 0) {
+        <p class="yb-small yb-muted detail-empty">Nothing listened on this day.</p>
+      } @else if (!selectedBooks().length) {
+        <p class="yb-small yb-muted detail-empty">
+          No session detail was recorded for this day — only the daily total.
+        </p>
+      } @else {
+        <div class="detail-sub">What you listened to</div>
+        @for (b of selectedBooks(); track b.bookId) {
+          <button type="button" class="book-row" (click)="openBookFromStats(b.bookId)">
+            <span class="yb-truncate title">{{ b.title }}</span>
+            <span class="yb-small yb-muted count">
+              {{ b.sessions }} {{ b.sessions === 1 ? 'session' : 'sessions' }}
+            </span>
+            <span class="yb-tabular time">{{ human(b.seconds) }}</span>
+          </button>
+        }
+
+        @if (selectedSessions().length > 1 || selectedBooks().length > 1) {
+          <div class="detail-sub">Sessions</div>
+          @for (s of selectedSessions(); track s.id) {
+            <div class="session-row">
+              <div class="session-main">
+                <span class="yb-truncate title">{{ s.bookTitle }}</span>
+                <span class="yb-small yb-muted when">{{ sessionRange(s) }}</span>
+              </div>
+              <span class="yb-tabular time">{{ human(s.seconds) }}</span>
+            </div>
+          }
+        }
       }
     </div>
 

@@ -138,6 +138,25 @@ export interface DayStat {
   seconds: number;
 }
 
+/**
+ * A single listening session — a continuous stretch of one book. Recorded so
+ * the stats can show *what* was listened to on a given day, and for how long,
+ * rather than only a daily total.
+ */
+export interface Session {
+  id: string;
+  bookId: string;
+  /** Title snapshotted at record time, so it survives the book being removed. */
+  bookTitle: string;
+  /** "YYYY-MM-DD" (local) of when the session started. */
+  date: string;
+  /** Millis. */
+  startedAt: number;
+  endedAt: number;
+  /** Seconds of audio actually heard in this session. */
+  seconds: number;
+}
+
 /** The whole synced library payload — what lives in Drive's appDataFolder. */
 export interface LibrarySnapshot {
   app: 'yarnbeard';

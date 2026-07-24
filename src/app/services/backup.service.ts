@@ -14,6 +14,7 @@ const BACKUP_KEYS = [
   'yarnbeard.notes.v1',
   'yarnbeard.notes.exports.v1',
   'yarnbeard.stats.v1',
+  'yarnbeard.sessions.v1',
   'yarnbeard.crests.v1',
   'yarnbeard.settings.v1',
   'yarnbeard.rates.v1',

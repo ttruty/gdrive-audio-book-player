@@ -111,12 +111,76 @@ ion-segment-button {
 }
 
 /* ── the fortnight chart ─────────────────────────────────────────────────── */
+$chart-h: 140px;
+$axis-w: 40px;
+/* Height of the day-initial row under the bars (margin-top + height). */
+$label-row: 18px;
+/* The bars and gridlines live in this region; the Y axis must match it. */
+$plot-h: $chart-h - $label-row;
+
+.chart-wrap {
+  display: flex;
+  padding: 0 16px 4px;
+  gap: 6px;
+}
+
+/* Y axis: three labels spanning exactly the bar-plot height, so each lines up
+   with its gridline. */
+.y-axis {
+  flex: 0 0 $axis-w;
+  height: $plot-h;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+}
+
+.y-tick {
+  height: 0;
+  line-height: 0;
+  color: var(--yb-muted);
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+
+  span {
+    display: inline-block;
+    transform: translateY(-50%);
+  }
+
+  /* Top label sits just below the top line (not clipped above the plot). */
+  &:first-child span {
+    transform: translateY(0);
+  }
+  /* Bottom "0" sits just above the baseline / day-initial row. */
+  &:last-child span {
+    transform: translateY(-100%);
+  }
+}
+
 .chart {
+  position: relative;
+  flex: 1;
   display: flex;
   align-items: flex-end;
   gap: 5px;
-  height: 130px;
-  padding: 0 16px 4px;
+  height: $chart-h;
+}
+
+/* Horizontal gridlines behind the bars, one per Y tick. */
+.gridlines {
+  position: absolute;
+  inset: 0 0 $label-row 0; /* stop above the day-initial labels */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+
+  span {
+    display: block;
+    height: 1px;
+    background: var(--yb-hairline);
+    opacity: 0.6;
+  }
 }
 
 .col {
@@ -125,6 +189,11 @@ ion-segment-button {
   flex-direction: column;
   align-items: center;
   height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bar-wrap {
@@ -132,25 +201,136 @@ ion-segment-button {
   width: 100%;
   display: flex;
   align-items: flex-end;
+  /* leave room for the day-initial row so bars scale within the plot */
+  padding-bottom: 0;
 }
 
 .bar {
   width: 100%;
+  min-height: 0;
   border-radius: 4px 4px 2px 2px;
   background: linear-gradient(
     180deg,
     var(--ion-color-primary),
     var(--ion-color-primary-shade)
   );
+  transition: opacity 0.15s ease;
 
   &.zero {
+    height: 2px;
     background: var(--yb-hairline);
   }
 }
 
+/* Dim the unselected bars so the chosen day stands out. */
+.col:not(.on) .bar:not(.zero) {
+  opacity: 0.55;
+}
+
+.col.on .bar {
+  box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.35);
+}
+
 .tick {
   margin-top: 6px;
+  height: 12px;
   font-size: 0.62rem;
+  color: var(--yb-muted);
+
+  &.today {
+    color: var(--ion-color-primary);
+    font-weight: 700;
+  }
+}
+
+.col.on .tick {
+  color: var(--ion-color-primary);
+  font-weight: 700;
+}
+
+/* ── selected-day detail ─────────────────────────────────────────────────── */
+.day-detail {
+  .detail-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .detail-day {
+    font-family: var(--yb-heading-family, var(--yb-serif));
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+
+  .detail-total {
+    color: var(--ion-color-primary);
+    font-size: 1.02rem;
+  }
+
+  .detail-empty {
+    margin: 8px 0 0;
+  }
+
+  .detail-sub {
+    margin: 14px 0 4px;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--yb-muted);
+  }
+
+  .book-row,
+  .session-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--yb-hairline);
+    text-align: left;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    color: var(--ion-text-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .book-row {
+    cursor: pointer;
+  }
+
+  .title {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+  }
+
+  .count {
+    flex: 0 0 auto;
+  }
+
+  .time {
+    flex: 0 0 auto;
+    color: var(--ion-color-primary);
+    font-size: 0.85rem;
+  }
+
+  .session-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .when {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .shelf-line {
