@@ -34,12 +34,37 @@ export class GoogleAuthService {
   private pendingReject: ((err: unknown) => void) | null = null;
   /** Coalesces concurrent refreshes so one 401 storm doesn't open five popups. */
   private inFlight: Promise<string> | null = null;
+  /** Fires a silent refresh shortly before the token would lapse. */
+  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Rate-limits the on-resume refresh so returning to the app can't spam it. */
+  private lastResumeAttempt = 0;
 
   readonly accessToken = signal<string | null>(null);
+  /**
+   * Whether the user has a standing Google connection. True while a live token
+   * is held AND while consent stands but the token has merely lapsed — in the
+   * latter case the app stays usable and refreshes lazily, rather than bouncing
+   * the user back to a sign-in screen.
+   */
   readonly isSignedIn = signal(false);
+  /** True only when a usable (unexpired) access token is in hand. */
+  readonly hasLiveToken = signal(false);
 
   constructor() {
     this.restoreFromStorage();
+
+    // Google access tokens last about an hour with no refresh token, so keep
+    // the session alive while the app is in use: refresh a little before the
+    // token lapses, and again when the app is brought back to the foreground.
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void this.refreshIfStale();
+      });
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', () => void this.refreshIfStale());
+      window.addEventListener('online', () => void this.refreshIfStale());
+    }
   }
 
   get configured(): boolean {
@@ -57,9 +82,49 @@ export class GoogleAuthService {
         this.accessToken.set(s.token);
         this.expiresAt = s.expiresAt;
         this.isSignedIn.set(true);
+        this.hasLiveToken.set(true);
+        this.scheduleProactiveRefresh();
+      } else if (this.consented && this.configured) {
+        // Consent stands but the token has lapsed. Keep the user signed in so
+        // they see their library, and refresh lazily — on resume, or on their
+        // next Drive action (which carries the user gesture a popup needs).
+        this.isSignedIn.set(true);
       }
     } catch {
       /* corrupt/unavailable storage — sail on signed out */
+    }
+  }
+
+  /** Refresh a few minutes before the current token would lapse. */
+  private scheduleProactiveRefresh(): void {
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    const lead = 5 * 60_000;
+    const delay = this.expiresAt - Date.now() - lead;
+    // setTimeout tops out around 24.8 days; anything sane fits well inside that.
+    if (delay > 0 && delay < 2_000_000_000) {
+      this.refreshTimer = setTimeout(() => {
+        void this.signIn(false).catch(() => {
+          /* silent refresh failed — the next Drive action will re-auth */
+        });
+      }, delay);
+    }
+  }
+
+  /**
+   * Attempt a silent refresh when the token has (nearly) lapsed. Called when the
+   * app regains focus. Best-effort and rate-limited: `prompt: ''` never shows UI
+   * — it either reissues a token from the live Google session or fails quietly,
+   * in which case the user re-auths on their next Drive action.
+   */
+  async refreshIfStale(): Promise<void> {
+    if (!this.consented || !this.configured) return;
+    if (this.accessToken() && Date.now() < this.expiresAt - 5 * 60_000) return;
+    if (Date.now() - this.lastResumeAttempt < 5 * 60_000) return;
+    this.lastResumeAttempt = Date.now();
+    try {
+      await this.signIn(false);
+    } catch {
+      /* stays optimistically signed in; interactive re-auth on next gesture */
     }
   }
 
@@ -80,11 +145,9 @@ export class GoogleAuthService {
   async restoreSession(): Promise<void> {
     if (this.accessToken() && Date.now() < this.expiresAt - 60_000) return;
     if (!this.consented || !this.configured) return;
-    try {
-      await this.signIn(false);
-    } catch {
-      /* no active Google session — the user can sign in by hand */
-    }
+    // Force the first attempt regardless of the resume rate-limit.
+    this.lastResumeAttempt = 0;
+    await this.refreshIfStale();
   }
 
   /** Wait for the GIS script, then build the token client exactly once. */
@@ -102,10 +165,12 @@ export class GoogleAuthService {
               if (resp?.access_token) {
                 this.accessToken.set(resp.access_token);
                 this.isSignedIn.set(true);
+                this.hasLiveToken.set(true);
                 this.expiresAt =
                   Date.now() + (Number(resp.expires_in) || 3600) * 1000;
                 this.consented = true;
                 this.persist();
+                this.scheduleProactiveRefresh();
                 this.pendingResolve?.(resp.access_token);
               } else {
                 this.pendingReject?.(new Error('Authorization was cancelled.'));
@@ -159,7 +224,14 @@ export class GoogleAuthService {
   async getValidToken(): Promise<string> {
     const token = this.accessToken();
     if (token && Date.now() < this.expiresAt - 60_000) return token;
-    return this.signIn(false);
+    try {
+      return await this.signIn(false);
+    } catch (err) {
+      // Silent refresh failed. If we still hold a stale token, hand it back so
+      // the request can 401 and escalate to interactive; otherwise propagate.
+      if (token) return token;
+      throw err;
+    }
   }
 
   signOut(): void {
@@ -171,10 +243,16 @@ export class GoogleAuthService {
         /* ignore */
       }
     }
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
     this.accessToken.set(null);
     this.isSignedIn.set(false);
+    this.hasLiveToken.set(false);
     this.expiresAt = 0;
     this.consented = false;
+    this.lastResumeAttempt = 0;
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {

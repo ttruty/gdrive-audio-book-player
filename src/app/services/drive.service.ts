@@ -61,17 +61,40 @@ export class DriveService {
     return s;
   }
 
+  /**
+   * The Google sign-in popup can only open in response to a user gesture, so
+   * only escalate to it when the user just interacted (playing a book, adding a
+   * folder). Background work — startup sync, read-ahead — fails quietly instead
+   * of firing a popup the browser would block anyway.
+   */
+  private get canPromptInteractive(): boolean {
+    return (
+      typeof navigator !== 'undefined' &&
+      !!(navigator as unknown as { userActivation?: { isActive: boolean } })
+        .userActivation?.isActive
+    );
+  }
+
   // ── low-level API ────────────────────────────────────────────────────────
   private async request(url: string, init: RequestInit = {}): Promise<Response> {
-    let token = await this.auth.getValidToken();
     const call = (t: string) =>
       fetch(url, {
         ...init,
         headers: { ...(init.headers ?? {}), Authorization: `Bearer ${t}` },
       });
 
+    let token: string;
+    try {
+      token = await this.auth.getValidToken();
+    } catch (err) {
+      // Silent refresh failed and no token is held. Re-auth interactively only
+      // if the user just did something; otherwise let the caller fail quietly.
+      if (!this.canPromptInteractive) throw err;
+      token = await this.auth.signIn(true);
+    }
+
     let res = await call(token);
-    if (res.status === 401) {
+    if (res.status === 401 && this.canPromptInteractive) {
       // Token rejected mid-session — one interactive refresh, then retry once.
       token = await this.auth.signIn(true);
       res = await call(token);

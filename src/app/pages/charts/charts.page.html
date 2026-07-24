@@ -11,7 +11,15 @@
     <ion-item lines="none">
       <ion-label>
         <h3>Google Drive</h3>
-        <p>{{ auth.isSignedIn() ? 'Signed in' : 'Not signed in' }}</p>
+        <p>
+          @if (!auth.isSignedIn()) {
+            Not signed in
+          } @else if (auth.hasLiveToken()) {
+            Signed in
+          } @else {
+            Signed in · will reconnect when you use Drive
+          }
+        </p>
       </ion-label>
       @if (auth.isSignedIn()) {
         <ion-button slot="end" fill="clear" color="danger" (click)="signOut()">
