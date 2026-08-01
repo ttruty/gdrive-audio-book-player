@@ -204,10 +204,11 @@ export class ShelfPage {
     this.pickerOpen.set(true);
   }
 
-  /** A folder was chosen in the browser — scan it with the current mode. */
-  async onFolderPicked(folderId: string): Promise<void> {
+  /** A folder was chosen in the browser — scan it the way the user picked. */
+  async onFolderPicked(choice: { folderId: string; mode: 'files' | 'folder' }): Promise<void> {
     this.pickerOpen.set(false);
-    this.folderLink.set(folderId);
+    this.addMode.set(choice.mode);
+    this.folderLink.set(choice.folderId);
     await this.addFromLink();
   }
 

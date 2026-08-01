@@ -168,14 +168,18 @@ export class DriveService {
    */
   async browseChildren(
     folderId: string
-  ): Promise<{ folders: DriveFolder[]; audioCount: number }> {
+  ): Promise<{ folders: DriveFolder[]; audioCount: number; containerCount: number }> {
     const children = await this.listChildren(folderId);
     const folders = children
       .filter((f) => this.isFolder(f))
       .map((f) => ({ id: f.id, name: f.name }))
       .sort((a, b) => naturalCompare(a.name, b.name));
-    const audioCount = children.filter((f) => this.isAudio(f)).length;
-    return { folders, audioCount };
+    const audio = children.filter((f) => this.isAudio(f));
+    // Container formats (.m4b/.m4a/.mp4) are usually whole books with their own
+    // embedded chapters; loose files (.mp3) are usually chapters of one book.
+    // The picker uses this to guess how to interpret a folder.
+    const containerCount = audio.filter((f) => MP4_EXT.test(f.name)).length;
+    return { folders, audioCount: audio.length, containerCount };
   }
 
   /** Top-level folders that other people have shared with you. */

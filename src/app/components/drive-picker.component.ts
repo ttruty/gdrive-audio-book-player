@@ -140,6 +140,28 @@ type Location = 'mydrive' | 'shared';
                 · {{ folders().length }} folder{{ folders().length === 1 ? '' : 's' }}
               }
             </div>
+
+            <!-- When the folder holds loose audio, ask how to read it: one book
+                 whose files are chapters, or a separate book per file. -->
+            @if (audioCount() > 0) {
+              <div class="modes">
+                <button
+                  class="m"
+                  [class.on]="pickMode() === 'folder'"
+                  (click)="pickMode.set('folder')"
+                >
+                  One book · files are chapters
+                </button>
+                <button
+                  class="m"
+                  [class.on]="pickMode() === 'files'"
+                  (click)="pickMode.set('files')"
+                >
+                  A separate book per file
+                </button>
+              </div>
+            }
+
             <ion-button expand="block" [disabled]="!canAdd()" (click)="pick()">
               <ion-icon slot="start" name="folder-open-outline" />
               Add “{{ current()?.name }}”
@@ -234,6 +256,27 @@ type Location = 'mydrive' | 'shared';
         margin-bottom: 8px;
         min-height: 1em;
       }
+      .modes {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .m {
+        flex: 1;
+        padding: 8px 6px;
+        border-radius: var(--yb-radius-button);
+        border: 1px solid var(--yb-hairline);
+        background: var(--yb-panel);
+        color: var(--yb-muted);
+        font-size: 0.74rem;
+        line-height: 1.2;
+        cursor: pointer;
+      }
+      .m.on {
+        border-color: var(--ion-color-primary);
+        color: var(--ion-color-primary);
+        font-weight: 600;
+      }
     `,
   ],
 })
@@ -241,7 +284,7 @@ export class DrivePickerComponent {
   private drive = inject(DriveService);
 
   readonly isOpen = input(false);
-  readonly picked = output<string>();
+  readonly picked = output<{ folderId: string; mode: 'files' | 'folder' }>();
   readonly dismiss = output<void>();
 
   readonly location = signal<Location>('mydrive');
@@ -250,6 +293,12 @@ export class DrivePickerComponent {
   readonly audioCount = signal(0);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  /**
+   * How to read the current folder's loose audio: `folder` = one book whose
+   * files are chapters (right for a folder of numbered .mp3s); `files` = a
+   * separate book per file (right for a folder of standalone .m4b audiobooks).
+   */
+  readonly pickMode = signal<'files' | 'folder'>('folder');
 
   constructor() {
     addIcons({ folderOutline, folderOpenOutline, chevronForward, refreshOutline });
@@ -333,9 +382,18 @@ export class DrivePickerComponent {
         this.folders.set(await this.drive.browseSharedWithMe());
         this.audioCount.set(0);
       } else {
-        const { folders, audioCount } = await this.drive.browseChildren(target.id);
+        const { folders, audioCount, containerCount } =
+          await this.drive.browseChildren(target.id);
         this.folders.set(folders);
         this.audioCount.set(audioCount);
+        // Guess the interpretation: mostly container files (.m4b) → a book each
+        // (so their embedded chapters are read); loose files (.mp3) → one book
+        // with the files as chapters. The user can flip it in the footer.
+        if (audioCount > 0) {
+          this.pickMode.set(
+            containerCount >= Math.ceil(audioCount / 2) ? 'files' : 'folder'
+          );
+        }
       }
     } catch (err: any) {
       this.folders.set([]);
@@ -348,6 +406,10 @@ export class DrivePickerComponent {
 
   pick(): void {
     const id = this.current()?.id;
-    if (id && !this.atRoot()) this.picked.emit(id);
+    if (!id || this.atRoot()) return;
+    // With no loose audio (a folder of book-subfolders), always use folder mode
+    // so each subfolder becomes its own book.
+    const mode = this.audioCount() > 0 ? this.pickMode() : 'folder';
+    this.picked.emit({ folderId: id, mode });
   }
 }
