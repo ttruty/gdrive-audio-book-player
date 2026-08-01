@@ -54,11 +54,12 @@ type Location = 'mydrive' | 'shared';
     IonSpinner,
   ],
   template: `
+    <!-- A full-height modal (not a breakpoint sheet): sheets don't reserve
+         space for an ion-footer, so the "Add" button ended up below the fold
+         with no way to scroll to it. A full modal pins the footer reliably. -->
     <ion-modal
-      class="yb-sheet"
+      class="yb-picker"
       [isOpen]="isOpen()"
-      [initialBreakpoint]="0.92"
-      [breakpoints]="[0, 0.92]"
       (didPresent)="onPresent()"
       (didDismiss)="onDismiss()"
     >

@@ -170,6 +170,11 @@ ion-modal.yb-sheet {
   --background: var(--ion-background-color);
 }
 
+/* The Drive folder browser is a full-height modal so its footer stays pinned. */
+ion-modal.yb-picker {
+  --background: var(--ion-background-color);
+}
+
 /* Toasts read like a bosun's shout. */
 ion-toast.yb-toast {
   --border-radius: 12px;
