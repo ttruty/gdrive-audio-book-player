@@ -22,15 +22,15 @@ export class AppComponent {
   private settings = inject(SettingsService);
 
   constructor() {
-    // Reuse a saved token (or silently refresh) so returning crew skip the door.
-    void this.auth.restoreSession();
-
-    // Once signed in, pull the library down from Drive exactly once per session,
-    // then refresh whatever book the player restored so it sees any new chapters.
-    // The sync sets its own status signals as it runs, hence allowSignalWrites.
+    // Pull the library from Drive once per session — but only when a *live*
+    // token is already in hand (a relaunch within the token's hour, or after
+    // the user re-authorizes by opening a Drive book). Gating on hasLiveToken
+    // rather than the optimistic isSignedIn is what stops the app from firing a
+    // Google prompt at launch. The sync writes its own status signals, hence
+    // allowSignalWrites.
     effect(
       () => {
-        if (this.auth.isSignedIn()) {
+        if (this.auth.hasLiveToken()) {
           void this.sync.pullOnce().then(() => this.player.refreshOpenBook());
         }
       },

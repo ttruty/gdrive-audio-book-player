@@ -79,7 +79,10 @@ export class SyncService {
   }
 
   private get enabled(): boolean {
-    return this.settings.syncToDrive() && this.auth.isSignedIn();
+    // Require a *live* token, not just optimistic sign-in: syncing must never be
+    // the thing that triggers a Google prompt. Pending changes flush once the
+    // user re-authorizes (by opening a Drive book) and a live token returns.
+    return this.settings.syncToDrive() && this.auth.hasLiveToken();
   }
 
   private snapshot(): LibrarySnapshot {

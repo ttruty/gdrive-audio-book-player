@@ -34,17 +34,13 @@ export class GoogleAuthService {
   private pendingReject: ((err: unknown) => void) | null = null;
   /** Coalesces concurrent refreshes so one 401 storm doesn't open five popups. */
   private inFlight: Promise<string> | null = null;
-  /** Fires a silent refresh shortly before the token would lapse. */
-  private refreshTimer: ReturnType<typeof setTimeout> | null = null;
-  /** Rate-limits the on-resume refresh so returning to the app can't spam it. */
-  private lastResumeAttempt = 0;
 
   readonly accessToken = signal<string | null>(null);
   /**
    * Whether the user has a standing Google connection. True while a live token
    * is held AND while consent stands but the token has merely lapsed — in the
-   * latter case the app stays usable and refreshes lazily, rather than bouncing
-   * the user back to a sign-in screen.
+   * latter case the app stays usable (library visible) and re-authorizes only
+   * when the user next does a Drive action, rather than at launch.
    */
   readonly isSignedIn = signal(false);
   /** True only when a usable (unexpired) access token is in hand. */
@@ -52,24 +48,28 @@ export class GoogleAuthService {
 
   constructor() {
     this.restoreFromStorage();
-
-    // Google access tokens last about an hour with no refresh token, so keep
-    // the session alive while the app is in use: refresh a little before the
-    // token lapses, and again when the app is brought back to the foreground.
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') void this.refreshIfStale();
-      });
-    }
-    if (typeof window !== 'undefined') {
-      window.addEventListener('focus', () => void this.refreshIfStale());
-      window.addEventListener('online', () => void this.refreshIfStale());
-    }
   }
 
   get configured(): boolean {
     const id = environment.googleClientId;
     return !!id && !id.includes('PASTE');
+  }
+
+  /**
+   * Google's token popup can only open in response to a user gesture. We also
+   * use this to refuse acquiring a token *without* one — so the app never
+   * surfaces a Google prompt on its own (at launch, during background sync,
+   * etc.). Requesting a token silently isn't reliable across browsers: when
+   * third-party cookies to accounts.google.com are blocked (Safari always,
+   * Chrome increasingly) the "silent" flow falls back to showing UI, which is
+   * exactly the every-launch prompt we want to avoid.
+   */
+  private hasUserGesture(): boolean {
+    return (
+      typeof navigator !== 'undefined' &&
+      !!(navigator as unknown as { userActivation?: { isActive: boolean } })
+        .userActivation?.isActive
+    );
   }
 
   private restoreFromStorage(): void {
@@ -79,52 +79,21 @@ export class GoogleAuthService {
       const s = JSON.parse(raw) as StoredSession;
       this.consented = !!s.consented;
       if (s.token && Date.now() < s.expiresAt - 60_000) {
+        // A still-valid token: fully signed in, no prompt needed. Relaunching
+        // within the token's ~1-hour life reuses this and never asks Google.
         this.accessToken.set(s.token);
         this.expiresAt = s.expiresAt;
         this.isSignedIn.set(true);
         this.hasLiveToken.set(true);
-        this.scheduleProactiveRefresh();
       } else if (this.consented && this.configured) {
         // Consent stands but the token has lapsed. Keep the user signed in so
-        // they see their library, and refresh lazily — on resume, or on their
-        // next Drive action (which carries the user gesture a popup needs).
+        // they see their library; re-authorize only when they next tap a Drive
+        // action (which carries the gesture Google's popup needs). Nothing is
+        // requested automatically here — that's what caused the launch prompt.
         this.isSignedIn.set(true);
       }
     } catch {
       /* corrupt/unavailable storage — sail on signed out */
-    }
-  }
-
-  /** Refresh a few minutes before the current token would lapse. */
-  private scheduleProactiveRefresh(): void {
-    if (this.refreshTimer) clearTimeout(this.refreshTimer);
-    const lead = 5 * 60_000;
-    const delay = this.expiresAt - Date.now() - lead;
-    // setTimeout tops out around 24.8 days; anything sane fits well inside that.
-    if (delay > 0 && delay < 2_000_000_000) {
-      this.refreshTimer = setTimeout(() => {
-        void this.signIn(false).catch(() => {
-          /* silent refresh failed — the next Drive action will re-auth */
-        });
-      }, delay);
-    }
-  }
-
-  /**
-   * Attempt a silent refresh when the token has (nearly) lapsed. Called when the
-   * app regains focus. Best-effort and rate-limited: `prompt: ''` never shows UI
-   * — it either reissues a token from the live Google session or fails quietly,
-   * in which case the user re-auths on their next Drive action.
-   */
-  async refreshIfStale(): Promise<void> {
-    if (!this.consented || !this.configured) return;
-    if (this.accessToken() && Date.now() < this.expiresAt - 5 * 60_000) return;
-    if (Date.now() - this.lastResumeAttempt < 5 * 60_000) return;
-    this.lastResumeAttempt = Date.now();
-    try {
-      await this.signIn(false);
-    } catch {
-      /* stays optimistically signed in; interactive re-auth on next gesture */
     }
   }
 
@@ -141,13 +110,15 @@ export class GoogleAuthService {
     }
   }
 
-  /** Reuse a live token, or silently refresh once consent has been granted. */
+  /**
+   * Called on app startup. Intentionally does nothing beyond what the
+   * constructor already did (load a still-valid stored token): the app must
+   * never trigger Google's auth flow on its own, or browsers that can't refresh
+   * silently would prompt on every launch. Re-authorization happens lazily,
+   * on the user's next Drive action.
+   */
   async restoreSession(): Promise<void> {
-    if (this.accessToken() && Date.now() < this.expiresAt - 60_000) return;
-    if (!this.consented || !this.configured) return;
-    // Force the first attempt regardless of the resume rate-limit.
-    this.lastResumeAttempt = 0;
-    await this.refreshIfStale();
+    /* no automatic token acquisition — see hasUserGesture() */
   }
 
   /** Wait for the GIS script, then build the token client exactly once. */
@@ -170,7 +141,6 @@ export class GoogleAuthService {
                   Date.now() + (Number(resp.expires_in) || 3600) * 1000;
                 this.consented = true;
                 this.persist();
-                this.scheduleProactiveRefresh();
                 this.pendingResolve?.(resp.access_token);
               } else {
                 this.pendingReject?.(new Error('Authorization was cancelled.'));
@@ -197,7 +167,12 @@ export class GoogleAuthService {
     });
   }
 
-  /** Interactive sign-in, or a silent refresh once consent exists. */
+  /**
+   * Request a token from Google. Opens the popup/flow, so it MUST be reached
+   * from a user gesture. `interactive` only affects whether we ask for the
+   * consent screen the very first time; once consent is granted, `prompt` is
+   * empty so returning users aren't asked to re-consent.
+   */
   async signIn(interactive = true): Promise<string> {
     if (!this.configured) {
       throw new Error(
@@ -220,15 +195,24 @@ export class GoogleAuthService {
     return this.inFlight;
   }
 
-  /** A token good for at least another minute, refreshing if it isn't. */
+  /**
+   * A token for a Drive call. Returns the live token if there is one. If it has
+   * lapsed, a new one is fetched ONLY when the caller is running inside a user
+   * gesture — so background work (startup sync, read-ahead) never pops a Google
+   * prompt on its own. Without a gesture it hands back the stale token (letting
+   * the request 401 harmlessly) or throws when there's nothing to hand back.
+   */
   async getValidToken(): Promise<string> {
     const token = this.accessToken();
     if (token && Date.now() < this.expiresAt - 60_000) return token;
+
+    if (!this.hasUserGesture()) {
+      if (token) return token;
+      throw new Error('Google authorization needed — open a Drive book to sign in.');
+    }
     try {
       return await this.signIn(false);
     } catch (err) {
-      // Silent refresh failed. If we still hold a stale token, hand it back so
-      // the request can 401 and escalate to interactive; otherwise propagate.
       if (token) return token;
       throw err;
     }
@@ -243,16 +227,11 @@ export class GoogleAuthService {
         /* ignore */
       }
     }
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-      this.refreshTimer = null;
-    }
     this.accessToken.set(null);
     this.isSignedIn.set(false);
     this.hasLiveToken.set(false);
     this.expiresAt = 0;
     this.consented = false;
-    this.lastResumeAttempt = 0;
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
