@@ -44,6 +44,7 @@ interface Stored {
   perBookRate: boolean;
   boost: number;
   skipSilence: boolean;
+  enhanceVoice: boolean;
   sleepFade: boolean;
   sleepMinutes: number;
   syncToDrive: boolean;
@@ -76,6 +77,12 @@ export class SettingsService {
   readonly perBookRate = signal(true);
   readonly boost = signal(1);
   readonly skipSilence = signal(false);
+  /**
+   * Speech enhancement for rough recordings: a high-pass to drop rumble, a dip
+   * in the muddy low-mids, a lift in the presence band for consonant clarity,
+   * and gentle compression to even out uneven or quiet levels.
+   */
+  readonly enhanceVoice = signal(false);
 
   /** Sleep. */
   readonly sleepFade = signal(true);
@@ -130,6 +137,7 @@ export class SettingsService {
       if (bool(s.perBookRate)) this.perBookRate.set(s.perBookRate!);
       if (num(s.boost)) this.boost.set(s.boost!);
       if (bool(s.skipSilence)) this.skipSilence.set(s.skipSilence!);
+      if (bool(s.enhanceVoice)) this.enhanceVoice.set(s.enhanceVoice!);
       if (bool(s.sleepFade)) this.sleepFade.set(s.sleepFade!);
       if (num(s.sleepMinutes)) this.sleepMinutes.set(s.sleepMinutes!);
       if (bool(s.syncToDrive)) this.syncToDrive.set(s.syncToDrive!);
@@ -156,6 +164,7 @@ export class SettingsService {
         perBookRate: this.perBookRate(),
         boost: this.boost(),
         skipSilence: this.skipSilence(),
+        enhanceVoice: this.enhanceVoice(),
         sleepFade: this.sleepFade(),
         sleepMinutes: this.sleepMinutes(),
         syncToDrive: this.syncToDrive(),

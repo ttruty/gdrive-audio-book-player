@@ -185,6 +185,21 @@
 
     <ion-item>
       <ion-toggle
+        [checked]="settings.enhanceVoice()"
+        (ionChange)="settings.enhanceVoice.set($any($event.detail.checked))"
+      >
+        <ion-label>
+          <h3>Enhance voice</h3>
+          <p>
+            Clears up muddy, muffled or uneven recordings — EQ for clarity plus
+            level evening. Best for rough, older audiobooks.
+          </p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-toggle
         [checked]="settings.skipSilence()"
         (ionChange)="settings.skipSilence.set($any($event.detail.checked))"
       >

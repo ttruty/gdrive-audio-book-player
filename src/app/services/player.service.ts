@@ -56,6 +56,11 @@ export class PlayerService {
   private audioCtx: AudioContext | null = null;
   private gainNode: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
+  // Speech-enhancement chain, flat (no-op) until "Enhance voice" is on.
+  private highpass: BiquadFilterNode | null = null;
+  private mudCut: BiquadFilterNode | null = null;
+  private presence: BiquadFilterNode | null = null;
+  private compressor: DynamicsCompressorNode | null = null;
   private silenceRAF: number | null = null;
   private silenceStart = -1;
 
@@ -132,8 +137,11 @@ export class PlayerService {
 
     effect(() => {
       const b = this.settings.boost();
-      if (b > 1) this.ensureAudioGraph();
-      if (this.gainNode) this.gainNode.gain.value = b;
+      const enhance = this.settings.enhanceVoice();
+      // Either feature needs the Web Audio graph; build it lazily, then apply.
+      if (b > 1 || enhance) this.ensureAudioGraph();
+      this.applyEnhance();
+      this.updateGain();
     });
 
     effect(() => {
@@ -772,24 +780,88 @@ export class PlayerService {
     }
   }
 
-  // ── Web Audio (boost + skip silence) ─────────────────────────────────────
+  // ── Web Audio (boost + skip silence + voice enhancement) ─────────────────
+  /*
+   * Chain: source → highpass → mud-cut → presence → compressor → gain →
+   * analyser → destination. The three filters and the compressor sit inline
+   * always, but stay flat (no-op) until "Enhance voice" turns them on, so
+   * there's no audible change unless the listener asks for it.
+   */
   private ensureAudioGraph(): void {
     if (this.audioCtx) return;
     try {
       const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
       if (!Ctx) return;
-      this.audioCtx = new Ctx();
-      const src = this.audioCtx!.createMediaElementSource(this.audio);
-      this.gainNode = this.audioCtx!.createGain();
-      this.gainNode.gain.value = this.settings.boost();
-      this.analyser = this.audioCtx!.createAnalyser();
+      const ctx: AudioContext = new Ctx();
+      this.audioCtx = ctx;
+
+      const src = ctx.createMediaElementSource(this.audio);
+
+      this.highpass = ctx.createBiquadFilter();
+      this.highpass.type = 'highpass';
+
+      this.mudCut = ctx.createBiquadFilter();
+      this.mudCut.type = 'peaking';
+      this.mudCut.frequency.value = 350; // boxy low-mids
+      this.mudCut.Q.value = 1;
+
+      this.presence = ctx.createBiquadFilter();
+      this.presence.type = 'peaking';
+      this.presence.frequency.value = 3000; // consonant clarity
+      this.presence.Q.value = 0.9;
+
+      this.compressor = ctx.createDynamicsCompressor();
+
+      this.gainNode = ctx.createGain();
+
+      this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = 512;
-      src.connect(this.gainNode);
+
+      src.connect(this.highpass);
+      this.highpass.connect(this.mudCut);
+      this.mudCut.connect(this.presence);
+      this.presence.connect(this.compressor);
+      this.compressor.connect(this.gainNode);
       this.gainNode.connect(this.analyser);
-      this.analyser.connect(this.audioCtx!.destination);
+      this.analyser.connect(ctx.destination);
+
+      this.applyEnhance();
+      this.updateGain();
     } catch {
       this.audioCtx = null;
     }
+  }
+
+  /** Set the enhancement nodes to their active or flat (no-op) values. */
+  private applyEnhance(): void {
+    if (!this.audioCtx || !this.highpass) return;
+    const on = this.settings.enhanceVoice();
+    const t = this.audioCtx.currentTime;
+    const ramp = (p: AudioParam, v: number) => p.setTargetAtTime(v, t, 0.02);
+
+    ramp(this.highpass.frequency, on ? 85 : 20); // 20 Hz ≈ inaudible = off
+    ramp(this.mudCut!.gain, on ? -3 : 0);
+    ramp(this.presence!.gain, on ? 5 : 0);
+
+    const c = this.compressor!;
+    ramp(c.threshold, on ? -24 : 0);
+    ramp(c.ratio, on ? 3 : 1); // ratio 1 = no compression
+    ramp(c.knee, on ? 30 : 0);
+    ramp(c.attack, 0.005);
+    ramp(c.release, 0.25);
+  }
+
+  /** Combined output gain: the volume boost, plus makeup when enhancing. */
+  private updateGain(): void {
+    if (!this.gainNode || !this.audioCtx) return;
+    // Compression tames peaks, so lift the level a touch to keep it from
+    // sounding quieter than the unprocessed audio.
+    const makeup = this.settings.enhanceVoice() ? 1.5 : 1;
+    this.gainNode.gain.setTargetAtTime(
+      this.settings.boost() * makeup,
+      this.audioCtx.currentTime,
+      0.02
+    );
   }
 
   /**

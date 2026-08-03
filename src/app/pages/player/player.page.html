@@ -216,6 +216,20 @@
 
       <div class="toggle-row">
         <div>
+          <div>Enhance voice</div>
+          <div class="yb-small yb-muted">
+            Clears up muddy, muffled or uneven recordings — EQ for clarity plus
+            level evening. Best for rough, older audiobooks.
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="settings.enhanceVoice()"
+          (ionChange)="settings.enhanceVoice.set($any($event.detail.checked))"
+        />
+      </div>
+
+      <div class="toggle-row">
+        <div>
           <div>Trim the silences</div>
           <div class="yb-small yb-muted">
             Skips the dead air between sentences. Shaves real minutes off a long book.
